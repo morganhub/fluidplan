@@ -1,7 +1,7 @@
 # Writing a fluidplan plan
 
 A good fluidplan plan can be settled in fifteen minutes and executed without rereading. It has two
-audiences: the person who decides (they read the pages) and Claude, who will execute it (it reads
+audiences: the person who decides (they read the pages) and the AI, who will execute it (it reads
 PLAN.md, built from the `tasks`). The same `plan.json` must serve both.
 
 ## 1. Spot what needs deciding
@@ -20,7 +20,7 @@ A **decision** is a point the person can settle on its own, without opening anot
 
 Do not create a decision for:
 - an implementation detail with no real alternative (that is a task);
-- a question Claude can settle alone by reading the code (settle it, and mention it in
+- a question the AI can settle alone by reading the code (settle it, and mention it in
   `learn_more` if the person would care);
 - two linked points that cannot be settled separately (make them a single decision with options).
 
@@ -136,11 +136,11 @@ no tasks (it orders those of the others); `check` does not complain about it.
 - What the source does not say (files, criteria): fill it in by exploring the code, or leave a
   descriptive `do` if there is no code.
 
-## 8. Starting from a request (Claude designs the plan)
+## 8. Starting from a request (the AI designs the plan)
 
 - Explore first: structure, conventions, tests, files involved.
-- List the real choices (those where the person has a preference or context Claude lacks).
-  Everything else is settled by Claude and shows up as tasks, or as `minor` decisions if it is
+- List the real choices (those where the person has a preference or context the AI lacks).
+  Everything else is settled by the AI and shows up as tasks, or as `minor` decisions if it is
   debatable.
 - `context`: the request restated in two or three sentences, the scope, what already exists.
 - For a medium-sized request: 2 to 4 pages, 6 to 15 decisions, 10 to 30 tasks.

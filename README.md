@@ -1,30 +1,50 @@
 # fluidplan
 
-A [Claude Code](https://claude.com/claude-code) skill that turns a plan into a small web app you
+A skill for Claude Code, Codex, and Gemini in Antigravity that turns a plan into a small web app you
 **decide** instead of a long Markdown file you read.
+
+## Version 1.1.0 — Codex and Antigravity compatibility
+
+This update extends the original Claude Code skill to Codex and Gemini in Antigravity. It adds
+client-specific instructions for automatic round listening, so submitting a round in the web
+app continues the review without requiring a message in the chat. Codex and Antigravity keep
+their agent turn active during review; Claude Code retains its existing background wait and
+completion notifications. The interface now uses assistant-neutral labels in English and French:
+**Send the plan to AI** / **Envoyer le plan à l'IA**.
 
 ![A decision card: why it matters, options with pros and cons](docs/images/02-decision.png)
 
 ## What it does
 
-1. Claude turns a plan into a local web app: one page per theme, one card per decision. The plan
-   can be a proposal document you already have, or the plan Claude designs for your request.
+1. The AI turns a plan into a local web app: one page per theme, one card per decision. The plan
+   can be a proposal document you already have, or the plan the AI designs for your request.
 2. You answer each card: **OK**, **Not OK**, **Change** or **Explain**. You can also rewrite any
    text in place.
-3. You click **Send to Claude**. Claude revises what you changed or questioned, and the page opens
-   **round 2**: you only see what changed, with Claude's note and a diff.
-4. When everything is settled, Claude writes two files:
+3. You click **Send the plan to AI**. The AI revises what you changed or questioned, and the page opens
+   **round 2**: you only see what changed, with the AI's note and a diff.
+4. When everything is settled, the AI writes two files:
    - **PLAN.md**: the tasks, phase by phase, with the files to touch, acceptance criteria and
      verify commands. It is ready to execute.
    - **DECISIONS.md**: every choice, why it was made, and what was ruled out.
 
 ## Requirements
 
-- Claude Code
+- Claude Code, Codex, or Gemini in Antigravity, with terminal execution tools
 - Node.js 20 or later
 - Any modern browser
 
 ## Install
+
+Install the complete skill folder in your client's global skills directory:
+
+| Client | Directory | Explicit invocation |
+|---|---|---|
+| Claude Code | `~/.claude/skills/fluidplan` | `/fluidplan` |
+| Codex | `~/.codex/skills/fluidplan` | `$fluidplan` |
+| Antigravity IDE / 2.0 | `~/.gemini/config/skills/fluidplan` | `/fluidplan` |
+| Antigravity CLI | `~/.gemini/antigravity-cli/skills/fluidplan` | `/fluidplan` |
+
+For example, for Claude Code (use the matching directory above for another client):
 
 ```bash
 git clone https://github.com/morganhub/fluidplan.git ~/.claude/skills/fluidplan
@@ -36,26 +56,29 @@ On Windows (PowerShell):
 git clone https://github.com/morganhub/fluidplan.git "$HOME\.claude\skills\fluidplan"
 ```
 
-Start a new Claude Code session. The skill is available in every project; there is nothing to
+Start a new assistant session. The skill is available in every project; there is nothing to
 install in the projects themselves.
 
 ## Use
 
-Open Claude Code in your project (not in plan mode) and ask, for example:
+Open your assistant in your project (outside a read-only plan mode) and ask, for example:
 
 - *"Present `docs/proposal.md` with fluidplan."* — a `.md`, `.txt`, `.docx` or `.pdf` document
 - *"Design the plan to add e-mail reminders and present it with fluidplan."*
-- or type `/fluidplan` followed by your request
+- or invoke the skill using the command for your client above, followed by your request
 
 Then:
 
-1. Claude writes the plan in `.fluidplan/<id>/`, checks it, and opens it in your browser.
+1. The AI writes the plan in `.fluidplan/<id>/`, checks it, and opens it in your browser.
 2. You answer the cards. Answers are saved as you go: you can close the page and come back.
-3. You click **Send to Claude**. Claude revises the plan and the page reloads into the next round.
-4. You repeat until everything is settled. Claude then writes `PLAN.md` and `DECISIONS.md`.
+3. You click **Send the plan to AI**. The AI revises the plan and the page reloads into the next round.
+4. You repeat until everything is settled. The AI then writes `PLAN.md` and `DECISIONS.md`.
 5. You say *"execute the plan"*.
 
-If Claude does not react after you send a round, type *"sent"* in the conversation.
+Keep the assistant session active during review. Claude Code uses its existing background wait
+and completion notifications. Codex and Antigravity keep an active turn awaiting the tracked wait
+command. No chat message is needed between rounds. See [`references/assistants.md`](references/assistants.md).
+After an interrupted session, *"sent"* in the conversation is a recovery option.
 
 ## A plan, step by step
 
@@ -72,14 +95,14 @@ a plan to add e-mail reminders to a small task app.
 
 **Sending the round.**
 
-![Send to Claude](docs/images/04-send.png)
+![Send the plan to AI](docs/images/04-send.png)
 
-**Round 2.** The page reloads by itself. Claude revised the two decisions you questioned, and only
+**Round 2.** The page reloads by itself. The AI revised the two decisions you questioned, and only
 those are shown by default.
 
 ![Round 2](docs/images/05-round-2.png)
 
-Each revised card carries Claude's note and a word-level diff with the previous version.
+Each revised card carries the AI's note and a word-level diff with the previous version.
 
 ![A revised decision](docs/images/06-revised.png)
 
@@ -111,7 +134,7 @@ two files.
   before/after, code, stats and more. A plan can also bring its own visual as a small JS module.
 - **Illustrations (optional).** An image can be generated for a visual with OpenAI, Google Gemini,
   Ludo.ai or Meshy, with a limit of 5 per service and per plan.
-- **Inputs.** Markdown, text, Word (`.docx`, read by a built-in converter) and PDF, or a plan Claude
+- **Inputs.** Markdown, text, Word (`.docx`, read by a built-in converter) and PDF, or a plan the AI
   designs from your request.
 - **Languages.** English (default) or French, set per plan.
 - **Local.** A small Node server on `127.0.0.1` with no dependencies. Nothing leaves your machine
@@ -140,9 +163,9 @@ Illustration services read their keys from `engine/.env` in the skill folder (se
 ### How a round works
 
 ```
-Claude writes plan.json ──► fluidplan serve ──► the page (you answer; answers.json)
+the AI writes plan.json ──► fluidplan serve ──► the page (you answer; answers.json)
         ▲                                               │
-        │                                     "Send to Claude" (state.json: submitted)
+        │                                     "Send the plan to AI" (state.json: submitted)
         │                                               │
    plan.json revised  ◄── digest ◄── fluidplan wait ◄───┘
    ("revision": { "round": n+1, "note" })
@@ -151,9 +174,10 @@ Claude writes plan.json ──► fluidplan serve ──► the page (you answer
                                                                                   PLAN.md, DECISIONS.md
 ```
 
-- Claude runs `serve` and `wait` in the background. `wait` exits when you send the round, which
-  wakes Claude up with a **digest** of what to rework.
-- Each file has a single writer. Claude writes `plan.json`. The page writes `answers.json`. The
+- The AI keeps `serve` running and listens through `wait`. Claude Code uses background task
+  completion; Codex and Antigravity await the tracked job in an active turn. `wait` exits when
+  you send the round and returns a **digest** of what to rework.
+- Each file has a single writer. The AI writes `plan.json`. The page writes `answers.json`. The
   engine writes `state.json` and `images.json`.
 - `next-round` refuses to run if a decision to rework has no `revision` for the next round. It
   resets only the answers of revised decisions and archives each round in `rounds/<n>/`.
@@ -162,7 +186,7 @@ Claude writes plan.json ──► fluidplan serve ──► the page (you answer
 
 ```
 .fluidplan/<id>/
-  plan.json          the plan (written by Claude)
+  plan.json          the plan (written by the AI)
   answers.json       your answers (written by the page)
   state.json         round and status
   images.json        generated illustrations and usage per service
@@ -173,7 +197,7 @@ Claude writes plan.json ──► fluidplan serve ──► the page (you answer
 
 ### CLI
 
-Claude drives the engine through one command, run from the project root:
+The AI drives the engine through one command, run from the project root:
 `node ~/.claude/skills/fluidplan/engine/fluidplan.mjs <command>`.
 
 | Command | What it does |
@@ -181,8 +205,8 @@ Claude drives the engine through one command, run from the project root:
 | `new --plan <id> --title "…"` | creates a plan from the template |
 | `check` | validates plans: errors block, warnings point at weak spots (a missing "why", a decision without tasks) |
 | `serve [--open]` | serves the page (reuses a running instance) |
-| `wait` | blocks until the round is sent, then prints the digest |
-| `digest` | what Claude has to rework in this round |
+| `wait [--timeout seconds]` | blocks until the round is sent, then prints the digest; a bounded timeout returns exit code 3 |
+| `digest` | what the AI has to rework in this round |
 | `next-round` | opens the next round after `plan.json` was revised |
 | `finalize` | writes `PLAN.md` and `DECISIONS.md` once everything is settled |
 | `export` | writes both files at any time (marked DRAFT if not settled) |
@@ -196,7 +220,7 @@ A plan is a JSON file: pages, decisions, options, tasks, phases and a glossary. 
 described in [`references/schema.md`](references/schema.md) and
 [`engine/schema/plan.schema.json`](engine/schema/plan.schema.json). A complete example is in
 [`examples/tech-feature/plans/tech-feature/plan.json`](examples/tech-feature/plans/tech-feature/plan.json).
-Claude follows [`SKILL.md`](SKILL.md) and the guides in [`references/`](references) to write
+The AI follows [`SKILL.md`](SKILL.md) and the guides in [`references/`](references) to write
 it.
 
 ### Stack
@@ -229,7 +253,7 @@ it.
 
 | Path | Content |
 |---|---|
-| `SKILL.md`, `references/` | the skill, as read by Claude |
+| `SKILL.md`, `references/` | the skill, as read by the AI |
 | `engine/fluidplan.mjs`, `engine/server.mjs` | CLI and server |
 | `engine/lib/` | configuration, plans, rounds, validation, exports, illustrations, `.docx` reader, browser driver |
 | `engine/public/` | the page: `css/`, `js/`, `i18n/` (en, fr), `fonts/` |

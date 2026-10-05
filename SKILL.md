@@ -1,11 +1,11 @@
 ---
 name: fluidplan
-description: Presents a plan as a small local web app in shadcn/ui style instead of a long .md file — one page per theme, one card per decision (OK, Not OK, Change, Explain) with why it matters, pros and cons per option, importance and a glossary; the person can rewrite any text. Claude revises round after round until everything is settled, then writes PLAN.md (tasks, files, acceptance criteria, verify commands — ready to execute) and DECISIONS.md. Use when a plan or proposal document (.md, .txt, .docx, .pdf) contains choices to settle, or to present the plan for a change Claude designs — "present this plan", "let me decide the options", "review this plan with me", "walk me through the decisions", "fluidplan". Plans are written in English (default) or French. Not for a single decision (answer in the conversation) or a document that only needs reading.
+description: Turn a Markdown, text, Word, or PDF plan with choices into a local interactive web page. The user decides each option and can rewrite text; the assistant listens for submitted rounds, revises the plan, and produces PLAN.md and DECISIONS.md. Use when asked for fluidplan, to present a proposal for review, or to let the user settle several design or implementation decisions. Not for a single decision or a document that only needs reading.
 ---
 
 # fluidplan
 
-A plan with choices to settle, presented as a local app: the person decides card by card, Claude
+A plan with choices to settle, presented as a local app: the person decides card by card, the assistant
 revises, and the final plan only has to be executed.
 
 The engine lives in this folder: `engine/fluidplan.mjs` (Node 20+, no dependencies). In the
@@ -19,7 +19,7 @@ Work **outside plan mode**: the skill writes files and starts a server.
 
 - A document proposes several things to decide (options, open questions, lists of proposals) and
   the person wants to settle them, not proofread.
-- Claude designs a change (feature, redesign, migration) that involves real choices: present it
+- The assistant designs a change (feature, redesign, migration) that involves real choices: present it
   with fluidplan instead of a Markdown plan.
 
 Not for: a single decision, a document that only needs reading, a plan with no choices at all
@@ -32,7 +32,7 @@ Not for: a single decision, a document that only needs reading, a plan with no c
    first: a fluidplan plan does not replace scoping.
 2. **Collect.**
    - `.md` / `.txt`: read directly.
-   - `.pdf`: Read tool, in chunks (`pages: "1-20"`).
+   - `.pdf`: Claude's Read tool, in chunks (`pages: "1-20"`); on other clients, use the available PDF reader or text extraction in page ranges.
    - `.docx`: `node <skill>/engine/fluidplan.mjs import <file.docx> --out .fluidplan/<id>/source`, then read `source.md`.
    - Request: explore the code (Explore subagents if the change is large) so that every task
      cites real files.
@@ -56,13 +56,17 @@ Not for: a single decision, a document that only needs reading, a plan with no c
    Details: `references/visuals.md`, "Generated illustrations".
 5. **Look before showing.** `node <skill>/engine/fluidplan.mjs snap --plan <id> --themes light,dark --widths 1400,390 --out <scratchpad>/snaps`,
    then read the screenshots (overflow, clipped text, empty visuals). Fix what you find.
-6. **Launch, in the background** (`run_in_background` parameter of the Bash or PowerShell tool):
-   - `node <skill>/engine/fluidplan.mjs serve --plan <id> --open` (the server; reused if it is already running);
-   - `node <skill>/engine/fluidplan.mjs wait --plan <id>`: exits when the person clicks
-     "Send to Claude" and prints the digest — that is what wakes you up.
-   Tell the person, in two or three sentences: the address, the four possible answers, rewriting
-   on hover, the "Send to Claude" button. If `wait` could not run, they can also write "sent" in
-   the conversation: then run `digest`.
+6. **Launch and listen.** Read `references/assistants.md` for your client (Claude Code, Codex,
+   or Gemini in Antigravity).
+   - `node <skill>/engine/fluidplan.mjs serve --plan <id> --open` (the persistent server; reused if already running);
+   - `node <skill>/engine/fluidplan.mjs wait --plan <id>`: exits on submission and prints the digest.
+   Tell the person the address, the four possible answers, rewriting on hover, and the localized
+   "Send the plan to AI" button ("Envoyer le plan à l'IA" in French). Say that you are listening.
+   **Keep listening until submission, finalization, or the person's interruption.** On Codex and
+   Antigravity, keep the agent turn active and follow the wait command with the client's job-wait
+   tools; a detached process alone cannot resume an idle conversation. Claude Code keeps its
+   existing background command and completion-notification workflow. Asking the person to write
+   "sent" is a recovery option only when automatic waiting is unavailable or the session was interrupted.
 7. **Revise** when `wait` returns (or run `node <skill>/engine/fluidplan.mjs digest --plan <id>`).
    For each decision the digest lists for rework:
    - *Change* or rewrite: incorporate it; a rewrite by the person is taken over **word for word**;
@@ -76,7 +80,8 @@ Not for: a single decision, a document that only needs reading, a plan with no c
    Rejected decisions stay rejected (no revision required); accepted ones are left untouched —
    except a dependent decision that a revision makes wrong (it gets a `revision` too).
    Then `check`, then `node <skill>/engine/fluidplan.mjs next-round --plan <id>`: the page reloads
-   by itself for the next round. Restart `wait` in the background. Back to step 7.
+   by itself for the next round. Restart `wait` using the same client-specific listening method.
+   Back to step 7; do not end the Codex or Antigravity turn while waiting for the next submission.
 8. **Finalize** when the digest has nothing left to rework and nothing without an answer:
    `node <skill>/engine/fluidplan.mjs finalize --plan <id>` writes `PLAN.md` and `DECISIONS.md`.
    Reread them, present them in a few lines, offer to execute.
@@ -104,6 +109,7 @@ Not for: a single decision, a document that only needs reading, a plan with no c
 
 | File | When to read it |
 |---|---|
+| `references/assistants.md` | Before launching: server lifetime and automatic round listening on Claude Code, Codex, or Antigravity. |
 | `references/authoring.md` | Before writing a plan: breaking it down, choosing importance, writing tasks. |
 | `references/pedagogy.md` | For `why`, pros / cons, `learn_more`, the glossary. |
 | `references/schema.md` | The `plan.json` format, field by field, with examples. |

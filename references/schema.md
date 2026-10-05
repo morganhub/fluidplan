@@ -47,7 +47,7 @@ decision) can carry `prompt`, `aspect`, `transparent`: the illustration to gener
 | `tasks` | tasks kept whichever option is chosen |
 | `depends_on` | ids of upstream decisions |
 | `source_ref` | where it is in the source |
-| `revision` | `{ "round": n, "note": "…" }` — set by Claude on each revision |
+| `revision` | `{ "round": n, "note": "…" }` — set by the AI on each revision |
 
 ## Controls
 

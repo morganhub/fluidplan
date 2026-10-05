@@ -1,11 +1,13 @@
 {
   "name": "fluidplan",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
-  "description": "A Claude Code skill that turns a plan into a small local web app: settle each decision, let Claude revise round after round, get a PLAN.md ready to execute.",
+  "description": "A skill for Claude Code, Codex, and Gemini in Antigravity: settle decisions in a local web app, let the AI revise each round, get a PLAN.md ready to execute.",
   "keywords": [
     "claude",
     "claude-code",
+    "codex",
+    "antigravity",
     "skill",
     "planning",
     "decisions",

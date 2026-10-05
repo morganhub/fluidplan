@@ -58,7 +58,7 @@ export async function buildDigest(config, id) {
   const pending = rows.filter(({ decision }) => verdict(decision, get(decision)) === "pending");
   const validated = rows.filter(({ decision }) => !toProcess.some((r) => r.decision === decision) && ["ok", "mixed"].includes(verdict(decision, get(decision))));
 
-  L.push(`# Round ${n} — digest for Claude`, "");
+  L.push(`# Round ${n} — digest for the AI assistant`, "");
   L.push(`> Plan "${plan.title}" (\`${id}\`) · status \`${state.status}\`${state.submitted_at ? ` · sent on ${state.submitted_at}` : ""}.`);
   L.push(`> For each decision under "To rework": work the answer into \`plan.json\` and set \`"revision": { "round": ${n + 1}, "note": "…" }\` (what changed, in one or two sentences addressed to the person).`);
   L.push('> A rewrite by the person is taken word for word. A question ("Question asked") is answered by expanding `why` or `learn_more`.');

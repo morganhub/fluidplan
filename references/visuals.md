@@ -143,7 +143,7 @@ generate it rather than describe it. Never for decoration: a plan stays a plan.
 - A good `prompt`: the subject, the composition, the style, and what to leave out (text in the
   image, logos). All four services understand English and French.
 
-**Generate**: the person clicks "Illustrate" on the visual and picks the service; or Claude, with
+**Generate**: the person clicks "Illustrate" on the visual and picks the service; or the AI, with
 their consent, runs `fluidplan images generate --plan <id> --target page:<id> --provider <service>`
 (`--target decision:<id>` for a decision's visual; `--prompt`, `--aspect`, `--transparent` to change
 the request). The image goes into `.fluidplan/<id>/assets/generated/` and the latest one is

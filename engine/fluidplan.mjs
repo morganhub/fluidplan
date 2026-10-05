@@ -27,8 +27,8 @@ Commands
   serve [--open] [--port n]        serve the page (reuses an instance already running for this project)
   check                            errors (exit code 1) and warnings, for every plan or --plan
   new --plan <id> --title "…"      create .fluidplan/<id>/plan.json from the template [--lang en|fr]
-  wait                             wait until the person sends the round, then print the digest
-  digest                           what Claude must rework (rounds/<n>/digest.md)
+  wait [--timeout seconds]         wait until the person sends the round, then print the digest
+  digest                           what the assistant must rework (rounds/<n>/digest.md)
   next-round [--force]             open the next round once plan.json is revised
   finalize [--force]               everything is decided: write PLAN.md and DECISIONS.md
   export                           write PLAN.md and DECISIONS.md (DRAFT if not everything is decided)
@@ -194,8 +194,8 @@ async function create(config) {
 
 // --- wait -----------------------------------------------------------------------------------------
 
-// Meant to run in the background: it exits when the person clicks "Send to Claude", which wakes
-// Claude up with the digest.
+// Keep this command attached to the client's tool job: it exits on "Send the plan to AI".
+// Claude receives background completion; Codex and Antigravity await the tracked job's digest.
 async function wait(config) {
   const id = await pickPlan(config);
   const timeout = args.timeout ? Number(args.timeout) * 1000 : Infinity;

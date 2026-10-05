@@ -32,12 +32,30 @@ configuration, or conversation API is required.
 3. If the job is still running, await it with `write_stdin` (empty input) in 10–30 second slices.
    If your host instead returns a code-execution cell ID, use its documented cell-wait tool.
    Follow only the waiting API and IDs actually returned by the host. Keep the same job alive.
-4. On successful completion, process the returned digest immediately. Run `check`, then
-   `next-round`, and repeat steps 2–4; or run `finalize` when everything is settled.
+4. On successful completion, process the returned digest immediately. If anything is unanswered
+   or needs revision, run `check`, then `next-round`, and repeat steps 2–4.
+5. Once the submitted plan is settled and unchanged since submission (`approval.approved`),
+   run `finalize`. When `approval.autoExecute` is true, read the
+   generated plan and execute its retained tasks immediately in the same active turn. Announce
+   the transition in commentary; do not ask the person to type "execute", confirm in chat, or
+   approve a second time. Round 1 is sufficient; later rounds work the same way after their
+   revisions are accepted. In `execution: "review"` mode, stop after generating the documents.
+6. Continue until the agreed tasks and checks are complete, or the person interrupts. If a new
+   material choice appears during implementation, use the page review loop for that choice.
+   Preserve earlier accepted choices and keep listening until the new round is submitted.
 
-Do not send a final response or require a chat message between rounds. Background shell jobs or
+Do not send a final response between rounds or between approval and automatic implementation.
+The page approves the accepted scope, not changes to Codex's tool permissions. Do not modify
+approval settings or infer permission to publish or deploy from a local implementation plan.
+Background shell jobs or
 asynchronous hooks alone do not start a new idle turn. An optional synchronous `Stop` hook can
 guard against premature completion on clients that support it, but is not needed for this loop.
+The local server never runs a plan's shell commands itself: the active Codex turn implements them.
+If the session ended, a background server cannot resume that idle assistant by itself.
+On recovery, read the generated checklist and actual project changes first. Resume incomplete
+tasks; do not repeat tasks whose acceptance criteria are already met.
+The approval snapshot covers both the plan and answers. Edits after submission need a fresh
+review before automatic execution; exporting a preview or forcing a draft is not approval.
 
 ## Gemini in Antigravity
 

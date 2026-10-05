@@ -7,7 +7,6 @@
   "action.modify.hint": "Je veux la changer : dire quoi, ou réécrire le texte",
   "action.explain": "Expliquer",
   "action.explain.hint": "Je ne tranche pas encore : j'ai une question",
-
   "verdict.aria": "Votre réponse",
   "verdict.ok": "Retenue",
   "verdict.modify": "À modifier",
@@ -15,16 +14,13 @@
   "verdict.explain": "Question posée",
   "verdict.ko": "Écartée",
   "verdict.pending": "Sans réponse",
-
   "itemVerdict.ok": "OK",
   "itemVerdict.ko": "Pas OK",
   "itemVerdict.modify": "À modifier",
   "itemVerdict.pending": "—",
-
   "importance.critical": "Critique",
   "importance.important": "Important",
   "importance.minor": "Mineur",
-
   "comment.add": "Ajouter une remarque",
   "comment.addGeneral": "Ajouter une remarque générale",
   "comment.remark": "Votre remarque (facultative)…",
@@ -33,21 +29,16 @@
   "comment.item": "Ce qu'il faudrait changer sur cet élément…",
   "comment.needModify": "Dites ce qu'il faut modifier (ou réécrivez le texte) : sans cela, la décision reste ouverte.",
   "comment.needQuestion": "Écrivez votre question : l'IA y répondra au prochain tour.",
-
   "why.title": "Pourquoi ça compte",
-
   "learnMore.title": "En savoir plus",
-
   "tasks.title": "Ce que ça implique",
   "tasks.none": "Aucune tâche avec cette réponse.",
   "tasks.acceptance": "Critères d'acceptation",
   "tasks.noAcceptance": "Aucun critère.",
   "tasks.verify": "Vérifier",
-
   "decision.phase": "Phase : {title}",
   "decision.question": "Question n° {n}",
   "decision.revised": "Révisée",
-
   "choice.other": "Autre variante",
   "choice.otherDetail": "À décrire dans votre remarque.",
   "choice.placeholder": "— choisir —",
@@ -68,16 +59,12 @@
   "choice.rewriteWhich": "Variante",
   "choice.rewriteLabel": "Libellé",
   "choice.rewriteDetail": "Détail",
-
   "number.proposed": "Proposé : {value}",
   "number.reset": "revenir à la proposition",
-
   "order.up": "Monter",
   "order.down": "Descendre",
-
   "items.judged": "{done} / {total} jugés",
   "items.restOk": "Tout ce qui reste : OK",
-
   "edit.rewrite": "Réécrire",
   "edit.aria": "Nouveau texte",
   "edit.save": "Enregistrer",
@@ -86,9 +73,7 @@
   "edit.rewritten": "Réécrit",
   "edit.showOriginal": "Voir l'original",
   "edit.hideOriginal": "Masquer l'original",
-
   "revision.title": "Révisée au tour {n}",
-
   "diff.show": "Voir l'écart",
   "diff.hide": "Masquer l'écart",
   "diff.title": "Titre",
@@ -99,23 +84,19 @@
   "diff.item": "Élément « {title} »",
   "diff.tasks": "Tâches",
   "diff.none": "Pas d'écart de texte : seule la note a changé.",
-
   "filter.aria": "Filtrer les décisions",
   "filter.all": "Tout",
   "filter.critical": "Critiques",
   "filter.todo": "À traiter",
   "filter.empty": "Rien à afficher avec ce filtre sur cette page.",
   "filter.showAll": "Tout afficher",
-
   "minor.title_one": "Point mineur ({count})",
   "minor.title_other": "Points mineurs ({count})",
   "minor.intro": "Des points simples, regroupés pour aller vite. Ouvrez-en un seulement s'il vous fait tiquer.",
   "minor.validateAll": "Tout valider",
-
   "nav.pages": "Pages du plan",
   "nav.open": "Ouvrir le sommaire",
-  "nav.progress": "{done} / {total} décisions tranchées",
-
+  "nav.progress": "{done} / {total} examinées",
   "home.nav": "Accueil",
   "home.kicker": "Plan à trancher",
   "home.decisions_one": "{count} décision",
@@ -139,13 +120,12 @@
   "home.phases": "Les phases du chantier",
   "home.phasesIntro": "Dans l'ordre proposé (ou celui que vous choisirez).",
   "home.start": "Commencer",
-
   "summary.nav": "Bilan et plan final",
   "summary.kicker": "Fin",
   "summary.title": "Bilan et plan final",
   "summary.intro": "Où en est le plan, ce qui reste à trancher, et l'aperçu des deux fichiers que l'IA écrira : PLAN.md (à exécuter) et DECISIONS.md (le pourquoi des choix).",
   "summary.readyTitle": "Tout est tranché",
-  "summary.readyText": "Envoyez le plan à l'IA : elle écrira PLAN.md et DECISIONS.md, puis proposera d'exécuter le plan.",
+  "summary.readyText": "Envoyez le tour à l’IA pour finaliser PLAN.md et DECISIONS.md.",
   "summary.notReadyTitle": "Pas encore prêt",
   "summary.notReadyText": "{pending} sans réponse, {revise} à reprendre. Vous pouvez envoyer ce tour quand même : l'IA révise ce qui est à reprendre, le reste reste ouvert.",
   "summary.stat.ok": "Retenues",
@@ -163,7 +143,6 @@
   "summary.noProviders": "Illustrations générées : aucun fournisseur configuré (engine/.env).",
   "summary.otherVariant": "autre variante (voir la remarque)",
   "summary.none": "aucune",
-
   "submit.button": "Envoyer le plan à l'IA",
   "submit.title": "Envoyer le tour {n} à l'IA ?",
   "submit.ready": "Tout est tranché : l'IA va écrire le plan final.",
@@ -174,7 +153,6 @@
   "submit.pending_other": "{count} décisions restent sans réponse : elles resteront ouvertes au tour suivant.",
   "submit.confirm": "Envoyer",
   "submit.done": "Tour envoyé — en attente du traitement par l'IA.",
-
   "banner.errors_one": "Le plan contient {count} erreur : il reste en brouillon",
   "banner.errors_other": "Le plan contient {count} erreurs : il reste en brouillon",
   "banner.submittedTitle": "Tour {n} envoyé — en attente du traitement par l'IA",
@@ -187,31 +165,24 @@
   "banner.planChangedTitle": "Le plan a changé sur le disque",
   "banner.planChangedText": "Rechargez pour voir la dernière version ; vos réponses sont gardées.",
   "banner.reload": "Recharger",
-
   "save.saved": "Enregistré",
   "save.saving": "Enregistrement…",
   "save.savedAt": "Enregistré à {time}",
   "save.offline": "Serveur injoignable : gardé dans ce navigateur",
   "save.stale": "Tour périmé : rechargez la page",
-
   "round.label": "Tour {n}",
   "round.short": "tour {n}",
-
   "glossary.title": "Glossaire",
   "glossary.empty": "Aucun terme.",
-
   "theme.toggle": "Changer de thème",
   "theme.system": "Thème : système",
   "theme.light": "Thème : clair",
   "theme.dark": "Thème : sombre",
-
   "common.close": "Fermer",
   "common.cancel": "Annuler",
-
   "op.create": "créer",
   "op.modify": "modifier",
   "op.delete": "supprimer",
-
   "visual.unknown": "Visuel inconnu « {kind} »",
   "visual.failed": "Le visuel « {kind} » n'a pas pu s'afficher",
   "visual.values": "Voir les valeurs",
@@ -239,7 +210,6 @@
   "visual.risk.low": "Risque faible",
   "visual.risk.medium": "Risque moyen",
   "visual.risk.high": "Risque élevé",
-
   "export.draft": "BROUILLON",
   "export.draftDetail": "toutes les décisions ne sont pas encore tranchées ({pending} sans réponse, {revise} à reprendre).",
   "export.metaReady": "Validé le {date}, tour {rounds}",
@@ -248,7 +218,6 @@
   "export.generated": "généré par fluidplan",
   "export.quote": "« {text} »",
   "export.dateTime": "{day} à {time}",
-
   "planMd.title": "{title} — plan d'exécution",
   "planMd.regenerate": "Ne pas modifier à la main avant l'exécution : régénérer avec `fluidplan export --plan {id}`. Pendant l'exécution, cocher les tâches au fil de l'eau.",
   "planMd.context": "Contexte",
@@ -266,7 +235,6 @@
   "planMd.items": "Éléments retenus",
   "planMd.finalCheck": "Vérification finale",
   "planMd.outOfScope": "Hors périmètre",
-
   "decisionsMd.title": "{title} — décisions",
   "decisionsMd.tally": "Bilan : {ok} retenues, {modify} à modifier, {explain} questions, {ko} écartées, {pending} sans réponse ({all} décisions).",
   "decisionsMd.kept": "Décisions retenues",
@@ -288,7 +256,6 @@
   "decisionsMd.detail": "Détail",
   "decisionsMd.opinion": "Avis",
   "decisionsMd.remark": "Remarque",
-
   "images.generate": "Illustrer",
   "images.again": "Autre version",
   "images.generated": "Générée",
@@ -316,5 +283,31 @@
   "images.confirm": "Générer",
   "images.done": "Illustration enregistrée : {path}",
   "images.noProvider": "Aucun service configuré : ajouter une clé dans engine/.env.",
-  "images.allExhausted": "Limite atteinte pour tous les services configurés ({quota} par service et par plan)."
+  "images.allExhausted": "Limite atteinte pour tous les services configurés ({quota} par service et par plan).",
+  "density.summary": "Synthétique",
+  "density.detailed": "Détaillée",
+  "density.switch": "Changer le niveau de détail",
+  "nav.unresolved_one": "{count} point à clarifier",
+  "nav.unresolved_other": "{count} points à clarifier",
+  "decision.benefit": "Bénéfice attendu",
+  "decision.tradeoff": "Compromis / risque",
+  "decision.facts": "Chiffres et repères",
+  "decision.visual": "Voir le schéma",
+  "home.goal": "L’essentiel",
+  "home.changes": "Ce qui change",
+  "home.risks": "Risques et limites",
+  "execution.auto": "Après l’envoi d’un tour entièrement tranché, Codex met en œuvre les tâches retenues. Les questions et demandes de modification déclenchent une révision avant l’exécution.",
+  "execution.review": "Cette revue sert à explorer les orientations. L’envoi produit les documents, sans lancer d’implémentation.",
+  "document.outline": "Sommaire",
+  "document.view": "Affichage du document",
+  "document.read": "Lecture",
+  "document.source": "Source Markdown",
+  "document.copyCode": "Copier le code",
+  "document.copied": "Code copié",
+  "document.copyFailed": "Impossible de copier le code",
+  "decision.details": "Consulter / modifier les choix et détails",
+  "decision.retained": "Choix retenu : {value}",
+  "summary.readyAutoText": "Envoyez ce tour pour finaliser PLAN.md et DECISIONS.md. Dans une session Codex active, l’IA met ensuite en œuvre les tâches retenues sans nouvelle confirmation dans le chat.",
+  "summary.readyReviewText": "Envoyez ce tour pour finaliser PLAN.md et DECISIONS.md. Ce plan sert uniquement à la revue : aucune implémentation ne suit.",
+  "summary.finalizedText": "Les fichiers PLAN.md et DECISIONS.md finalisés sont disponibles ci-dessous pour lecture et téléchargement."
 }

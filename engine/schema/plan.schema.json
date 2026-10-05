@@ -14,6 +14,15 @@
     "subtitle": { "type": "string" },
     "lang": { "enum": ["en", "fr"], "default": "en", "description": "Language of the interface and the exports; the plan's content is written in this language." },
     "accent": { "enum": ["neutral", "blue", "green", "orange", "rose", "violet", "yellow"], "default": "neutral", "description": "Main color (shadcn preset)." },
+    "execution": { "enum": ["auto", "review"], "default": "auto", "description": "Codex executes accepted tasks after submitted approval; review returns documents only." },
+    "summary": {
+      "type": "object", "required": ["goal"], "additionalProperties": false,
+      "properties": {
+        "goal": { "type": "string", "description": "A short, faithful statement of the expected outcome." },
+        "changes": { "type": "array", "items": { "type": "string" } },
+        "risks": { "type": "array", "items": { "type": "string" } }
+      }
+    },
     "source": {
       "type": "object",
       "additionalProperties": false,
@@ -97,6 +106,8 @@
         "phase": { "$ref": "#/$defs/id" },
         "why": { "$ref": "#/$defs/markdown", "description": "Why it matters: the context and what a mistake would cost. Required if critical." },
         "proposal": { "$ref": "#/$defs/markdown" },
+        "benefit": { "type": "string", "description": "The concrete benefit, kept visible in the summary density." },
+        "tradeoff": { "type": "string", "description": "The main limitation or consequence, kept visible in the summary density." },
         "learn_more": { "$ref": "#/$defs/markdown", "description": "Long explanation, collapsed by default." },
         "question": { "type": "integer", "description": "Number of the open question in the source document." },
         "facts": {

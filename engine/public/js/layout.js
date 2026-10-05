@@ -43,12 +43,13 @@ export function renderApp(ctx, { api }) {
   };
   const sideProgress = progress([]);
   const sideCount = h("div", { class: "side-count muted" });
+  const sideUnresolved = h("div", { class: "side-count muted", role: "status" });
   const sidebar = h("aside", { class: "sidebar" },
     h("div", { class: "side-brand" },
       h("div", { class: "side-logo", "aria-hidden": "true" }, icon("list-checks")),
       h("div", { class: "side-titles" }, h("div", { class: "side-title" }, plan.title), plan.subtitle ? h("div", { class: "side-sub" }, plan.subtitle) : null)),
     h("div", { class: "side-scroll" }, buildNav()),
-    h("div", { class: "side-foot" }, sideProgress.el, sideCount));
+    h("div", { class: "side-foot" }, sideProgress.el, sideCount, sideUnresolved));
 
   // --- header -----------------------------------------------------------------------------------------
   const crumbs = h("div", { class: "crumbs" });
@@ -56,6 +57,11 @@ export function renderApp(ctx, { api }) {
   const mobileNav = sheet({ title: plan.title, description: plan.subtitle, closeLabel: t("common.close") });
   const glossarySheet = sheet({ title: t("glossary.title"), side: "right", closeLabel: t("common.close") });
   const themeButton = button({ icon: "monitor", variant: "ghost", size: "sm", title: t("theme.toggle"), onclick: cycleTheme });
+  const densityButton = button({ label: t(ctx.density === "detailed" ? "density.detailed" : "density.summary"), icon: "book-open", variant: "outline", size: "sm", className: "density-button", title: t("density.switch"), onclick: () => {
+    ctx.setDensity(ctx.density === "summary" ? "detailed" : "summary");
+    densityButton.querySelector("span").textContent = t(ctx.density === "detailed" ? "density.detailed" : "density.summary");
+    current?.update?.();
+  } });
   const submitButton = button({ label: t("submit.button"), icon: "send", size: "sm", className: "submit-button", onclick: submit });
   const topbar = h("header", { class: "topbar" },
     button({ icon: "menu", variant: "ghost", size: "sm", title: t("nav.open"), className: "menu-button", onclick: () => mobileNav.open(buildNav()) }),
@@ -65,6 +71,7 @@ export function renderApp(ctx, { api }) {
       badge(t("round.label", { n: ctx.state.round }), { variant: "outline", icon: "history", className: "round-badge" }),
       plan.glossary?.length ? button({ icon: "book-open", variant: "ghost", size: "sm", title: t("glossary.title"), onclick: () => glossarySheet.open(glossaryList(plan.glossary, t)) }) : null,
       themeButton,
+      densityButton,
       submitButton));
 
   const banners = h("div", { class: "banners" });
@@ -139,8 +146,9 @@ export function renderApp(ctx, { api }) {
           route();
           return;
         }
-        const folded = target.closest("details:not([open])");
-        if (folded) folded.open = true;
+        for (let parent = target.parentElement; parent; parent = parent.parentElement) {
+          if (parent.matches("details:not([open])")) parent.open = true;
+        }
         target.scrollIntoView({ behavior: "smooth", block: "center" });
         target.classList.add("flash");
         setTimeout(() => target.classList.remove("flash"), 1600);
@@ -207,12 +215,12 @@ export function renderApp(ctx, { api }) {
         ready.pending.length ? t("submit.pending", { count: ready.pending.length }) : "",
       ].filter(Boolean).join(" "),
       closeLabel: t("common.close"),
-      content: h("ul", { class: "submit-counts" },
+      content: h("div", {}, h("p", { class: "workflow-notice" }, t(plan.execution === "review" ? "execution.review" : "execution.auto")), h("ul", { class: "submit-counts" },
         h("li", {}, t("summary.stat.ok"), h("b", {}, String(c.ok + c.mixed))),
         h("li", {}, t("summary.stat.modify"), h("b", {}, String(c.modify))),
         h("li", {}, t("summary.stat.explain"), h("b", {}, String(c.explain))),
         h("li", {}, t("summary.stat.ko"), h("b", {}, String(c.ko))),
-        h("li", {}, t("summary.stat.pending"), h("b", {}, String(c.pending)))),
+        h("li", {}, t("summary.stat.pending"), h("b", {}, String(c.pending))))),
       actions: ({ close }) => [
         button({ label: t("common.cancel"), variant: "outline", onclick: close }),
         button({
@@ -254,6 +262,7 @@ export function renderApp(ctx, { api }) {
       { tone: "ko", value: c.ko },
     ]);
     sideCount.textContent = t("nav.progress", { done: c.all - c.pending, total: c.all });
+    sideUnresolved.textContent = t("nav.unresolved", { count: readiness(plan, store.answers).revise.length });
     for (const { stateIcon, count, extra } of navLinks.values()) {
       if (!extra?.page) continue;
       const state = store.pageState(extra.page);

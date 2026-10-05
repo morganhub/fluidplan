@@ -8,6 +8,7 @@ import { httpError, readJson, toPosix, writeAtomic, writeJson } from "./fsutil.m
 import { loadAnswers, loadPlan, loadState, planFiles, saveAnswers, saveState } from "./plans.mjs";
 import { checkPlan } from "./check.mjs";
 import { langOf, translator, writeOutputs } from "./outputs.mjs";
+import { approvalFor } from "./approval.mjs";
 import { allDecisions, controlSummary, counts, dependents, importanceOf, itemVerdict, needsRevision, readiness, verdict } from "../public/js/model.js";
 
 // Freezes the round: the archive keeps what the person saw and answered.
@@ -49,6 +50,7 @@ export async function buildDigest(config, id) {
   const answers = await loadAnswers(config, id);
   const state = await loadState(config, id);
   const t = translator(langOf(plan, config));
+  const approval = await approvalFor(config, id, plan, answers, state);
   const n = state.round;
   const L = [];
   const rows = allDecisions(plan);
@@ -99,7 +101,18 @@ export async function buildDigest(config, id) {
   L.push(validated.length ? validated.map(({ decision }) => decision.id).join(", ") : "_None._", "");
 
   L.push("## Next step", "");
-  if (!toProcess.length && !pending.length) L.push(`Everything is decided: \`fluidplan finalize --plan ${id}\` writes PLAN.md and DECISIONS.md.`);
+  let nextAction = "revise";
+  if (!toProcess.length && !pending.length) {
+    if (!approval.approved) {
+      nextAction = "review";
+      L.push("The current plan is not approved as submitted. Do not execute it: present any changed scope in a new review and obtain submission.");
+    } else {
+      nextAction = approval.autoExecute ? "finalize_and_execute" : "finalize";
+      L.push(`Everything is decided: \`fluidplan finalize --plan ${id}\` writes PLAN.md and DECISIONS.md.`);
+      if (approval.autoExecute) L.push("On Codex, continue immediately with the accepted tasks in PLAN.md, in this same active turn. Do not ask for another chat approval. Rejected decisions are excluded; existing execution permissions and the user's scope still apply.");
+      else L.push(approval.mode === "review" ? "Review only: return the documents without implementing the plan." : "No retained tasks: there is no implementation to execute.");
+    }
+  }
   else if (!toProcess.length) L.push(`Nothing to rework, but ${pending.length} decision(s) without an answer: \`fluidplan next-round --plan ${id}\` reopens the page as is.`);
   else L.push(`Revise the ${toProcess.length} decision(s) above, run \`fluidplan check --plan ${id}\`, then \`fluidplan next-round --plan ${id}\`.`);
   L.push("");
@@ -107,7 +120,7 @@ export async function buildDigest(config, id) {
   const markdown = L.join("\n");
   const file = path.join(planFiles(config, id).round(n), "digest.md");
   await writeAtomic(file, markdown);
-  return { markdown, path: toPosix(path.relative(config.root, file)), toProcess: toProcess.map(({ decision }) => decision.id), pending: pending.map(({ decision }) => decision.id) };
+  return { markdown, path: toPosix(path.relative(config.root, file)), toProcess: toProcess.map(({ decision }) => decision.id), pending: pending.map(({ decision }) => decision.id), nextAction, approval };
 }
 
 export async function nextRound(config, id, { force = false } = {}) {
@@ -171,11 +184,12 @@ export async function finalize(config, id, { force = false } = {}) {
   }
   const state = await loadState(config, id);
   if (ready.ready) state.status = "ready";
+  const approval = await approvalFor(config, id, plan, answers, state);
   const written = await writeOutputs(config, id);
   if (ready.ready) {
     state.status = "exported";
     state.exported_at = new Date().toISOString();
   }
   await saveState(config, id, state);
-  return { ...written, draft: !ready.ready };
+  return { ...written, draft: !ready.ready, approval };
 }

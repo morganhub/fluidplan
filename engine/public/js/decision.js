@@ -8,8 +8,9 @@ import { illustrationFor } from "./illustration.js";
 import { applyGlossary } from "./glossary.js";
 import { icon } from "./icons.js";
 import { md, plain } from "./md.js";
-import { importanceOf, textOf, verdict } from "./model.js";
+import { controlSummary, importanceOf, textOf, verdict } from "./model.js";
 import { revisionNotice } from "./revision.js";
+import { readingDetail } from "./reading.js";
 import { accordion, alert, attachFloating, badge } from "./ui.js";
 import { renderVisual } from "./visuals/index.js";
 
@@ -63,13 +64,8 @@ export function renderDecision(decision, ctx, { compact = false } = {}) {
   const header = h("header", { class: "card-header" }, meta, title);
 
   const body = h("div", { class: "card-content" });
+  const support = h("div", { class: "decision-support" });
   if (revised) body.append(revisionNotice(decision, ctx.previous?.[decision.id], t));
-
-  if (decision.why && !compact) {
-    body.append(importance === "critical"
-      ? alert({ variant: "warning", icon: "lightbulb", title: t("why.title"), description: h("div", { html: md(decision.why) }) })
-      : h("div", { class: "why" }, icon("lightbulb"), h("div", {}, h("span", { class: "why-label" }, t("why.title")), h("div", { html: md(decision.why) }))));
-  }
 
   if (decision.proposal) {
     const proposal = editableText({
@@ -87,30 +83,41 @@ export function renderDecision(decision, ctx, { compact = false } = {}) {
     body.append(proposal.el);
   }
 
+  const detail = (options) => { const view = readingDetail(ctx, options); parts.push(view); support.append(view.el); };
+  for (const field of ["benefit", "tradeoff"]) {
+    if (decision[field]) body.append(h("div", { class: `decision-${field}` }, h("strong", {}, t(`decision.${field}`)), h("div", { html: md(decision[field]) })));
+  }
+  if (decision.why && !compact) {
+    if (importance === "critical") body.append(alert({ variant: "warning", icon: "lightbulb", title: t("why.title"), description: h("div", { html: md(decision.why) }) }));
+    else detail({ label: t("why.title"), icon: "lightbulb", content: h("div", { class: "d-text", html: md(decision.why) }) });
+  }
+
   if (decision.facts?.length) {
-    body.append(h("dl", { class: "facts" }, decision.facts.map((fact) => h("div", { class: "fact" }, h("dt", {}, fact.label), h("dd", {}, fact.value)))));
+    detail({ label: t("decision.facts"), icon: "info", content: h("dl", { class: "facts" }, decision.facts.map((fact) => h("div", { class: "fact" }, h("dt", {}, fact.label), h("dd", {}, fact.value)))) });
   }
 
   if (decision.visual) {
     const visual = renderVisual(decision.visual, ctx);
     const illustration = illustrationFor(`decision:${decision.id}`, decision.visual, ctx);
     parts.push(visual);
-    body.append(h("div", { class: "d-visual" }, illustration?.el, visual.el));
+    // Controls and their tradeoffs stay visible; supporting diagrams can be opened separately.
+    detail({ label: t("decision.visual"), icon: "layers", content: h("div", { class: "d-visual" }, illustration?.el, visual.el) });
   }
 
   if (decision.items?.length) {
     const list = itemsList(decision, ctx);
     parts.push(list);
-    body.append(list.el);
+    support.append(list.el);
   } else if (decision.control) {
     const control = controlFor(decision, ctx);
     parts.push(control);
-    body.append(h("div", { class: "d-control" }, control.el));
+    support.append(h("div", { class: "d-control" }, control.el));
   }
 
   const extras = h("div", { class: "d-extras" });
   if (decision.learn_more) {
-    extras.append(accordion({ label: t("learnMore.title"), icon: "book-open", content: () => h("div", { class: "d-text", html: md(decision.learn_more) }) }));
+    const view = readingDetail(ctx, { label: t("learnMore.title"), icon: "book-open", content: () => h("div", { class: "d-text", html: md(decision.learn_more) }) });
+    parts.push(view); extras.append(view.el);
   }
   const tasks = tasksPanel(decision, ctx);
   const tasksCount = h("span", { class: "badge badge-secondary" });
@@ -118,7 +125,20 @@ export function renderDecision(decision, ctx, { compact = false } = {}) {
     parts.push(tasks);
     extras.append(accordion({ label: t("tasks.title"), icon: "list-checks", right: tasksCount, content: tasks.el }));
   }
-  if (extras.childNodes.length) body.append(extras);
+  if (extras.childNodes.length) support.append(extras);
+
+  // Fold accepted cards when returning to a page, never underneath an active choice.
+  const settled = () => ["ok", "mixed"].includes(verdict(decision, get()));
+  let density = ctx.density;
+  const retained = h("p", { class: "retained-choice muted" });
+  const supporting = accordion({ label: t("decision.details"), content: support, className: "decision-details", open: !(ctx.density === "summary" && settled()) });
+  const showRetained = () => {
+    const value = controlSummary(decision, get(), plan, t, { effective: true });
+    retained.hidden = !settled() || supporting.open || !value;
+    retained.textContent = value ? t("decision.retained", { value }) : "";
+  };
+  supporting.addEventListener("toggle", showRetained);
+  body.append(retained, supporting);
 
   const bar = verdictBar({
     get,
@@ -142,6 +162,13 @@ export function renderDecision(decision, ctx, { compact = false } = {}) {
 
   function update() {
     const v = verdict(decision, get());
+    if (density !== ctx.density) {
+      density = ctx.density;
+      supporting.open = !(density === "summary" && settled());
+    }
+    supporting.querySelector("summary").hidden = !settled();
+    if (!settled()) supporting.open = true;
+    showRetained();
     el.dataset.status = v;
     stateSlot.replaceChildren(verdictBadge(v, t));
     tasksCount.textContent = String(tasks.count());

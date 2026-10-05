@@ -288,13 +288,13 @@
   .menu-button { display: inline-flex; }
   .topbar { padding: 0 0.5rem 0 0.25rem; }
   .round-badge { display: none; }
-  .submit-button span { display: none; }
-  .submit-button { width: 2rem; padding: 0; }
+  .submit-button span { display: inline; }
+  .submit-button { width: auto; }
   .content-wrap { padding: 1rem 1rem 3rem; }
   h1 { font-size: 1.5rem; }
   .card { padding: 1.25rem 0; gap: 1.25rem; }
   .card-header, .card-content, .card-footer { padding-left: 1rem; padding-right: 1rem; }
-  .toggle .toggle-label { display: none; }
+  .toggle .toggle-label { display: inline; }
   .item { grid-template-columns: 2rem minmax(0, 1fr); }
   .item-verdict { grid-column: 2; justify-self: start; }
   .item-icon, .item-medal { width: 2rem; height: 2rem; }
@@ -305,6 +305,61 @@
   .compare thead th { min-width: 8rem; }
 }
 @media (max-width: 480px) {
-  .page-nav .btn span { display: none; }
-  .page-nav .btn { width: 2.25rem; padding: 0; }
+  .page-nav .btn span { display: inline; white-space: normal; }
+  .page-nav .btn { width: auto; height: auto; min-height: 2.25rem; padding: 0.5rem; }
 }
+
+/* Editorial reading: the proposal and choices lead; supporting detail stays available. */
+.decision { box-shadow: none; }
+.d-title { font-size: 1.125rem; line-height: 1.4; }
+.d-text { line-height: 1.7; overflow-wrap: anywhere; }
+.decision-benefit, .decision-tradeoff { display: grid; gap: 0.25rem; line-height: 1.6; }
+.decision-benefit strong, .decision-tradeoff strong { font-size: 0.75rem; }
+.decision-tradeoff { border-left: 2px solid var(--warning); padding-left: 0.75rem; }
+.reading-detail .accordion-content { min-width: 0; }
+.reading-detail .page-visual { box-shadow: none; }
+.home-synthesis .d-text { gap: 1rem; }
+.home-synthesis h3 { margin-bottom: 0.5rem; font-size: 0.875rem; }
+.workflow-notice { padding: 0.75rem 1rem; border-left: 2px solid var(--info); color: var(--muted-foreground); line-height: 1.6; }
+.document-reader { display: grid; gap: 1.25rem; min-width: 0; }
+.md-document { padding: 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-lg); line-height: 1.75; overflow-wrap: anywhere; }
+.md-document > * + * { margin-top: 1rem; }
+.md-document h2 { font-size: 1.5rem; }
+.md-document h3 { font-size: 1.125rem; }
+.md-document h4, .md-document h5, .md-document h6 { font-size: 1rem; }
+.md-document :is(h2,h3,h4,h5,h6) { scroll-margin-top: calc(var(--header-height) + 1rem); }
+.md-document ul, .md-document ol { line-height: 1.8; }
+.md-document li ul, .md-document li ol { margin-top: 0.25rem; }
+.md-task { list-style: none; }
+.md-task input { margin: 0 0.5rem 0 0; }
+.md-document blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 2px solid var(--border); color: var(--muted-foreground); }
+.md-outline { display: grid; max-height: 18rem; overflow: auto; }
+.md-outline .btn { justify-content: flex-start; white-space: normal; height: auto; text-align: left; }
+.md-outline .toc-level-3 { padding-left: 1.5rem; }
+.md-outline .toc-level-4 { padding-left: 2.5rem; }
+.md-table-wrap { overflow-x: auto; }
+.md-table-wrap table { border-collapse: collapse; width: 100%; }
+.md-table-wrap :is(th,td) { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
+.md-table-wrap th { background: var(--muted); }
+.md-document .code-block { display: grid; gap: 0.75rem; }
+.md-document .copy-code { justify-self: start; }
+@media (max-width: 1024px) {
+  .topbar { height: auto; min-height: var(--header-height); flex-wrap: wrap; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .topbar-right { flex-wrap: wrap; }
+}
+@media (max-width: 768px) {
+  :root { --header-height: 7rem; }
+  .topbar { min-height: 0; }
+  .topbar-right { width: 100%; justify-content: flex-end; gap: 0.25rem; }
+  .topbar-right .btn { padding-left: 0.5rem; padding-right: 0.5rem; font-size: 0.75rem; }
+  .verdict-row .btn { font-size: 0.75rem; }
+  .verdict-row .toggle-group:not(.compact) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: 0.375rem; box-shadow: none; }
+  .verdict-row .toggle-group:not(.compact) > .toggle { margin-left: 0; border-radius: var(--radius-md); font-size: 0.8125rem; }
+  .md-document { padding: 1rem; }
+  .page-nav .btn { max-width: 42%; }
+}
+
+.decision-support { display: grid; gap: 1rem; min-width: 0; }
+.decision-details { border: 0; }
+.decision-details > .accordion-content { padding: 0; }
+.decision-details > summary { font-size: 0.8125rem; }

@@ -14,6 +14,8 @@ also enforces the rules that matter (references, cycles, files). Keys are in Eng
 | `lang` | | `en` (default) or `fr`: interface and exports |
 | `accent` | | main color: `neutral` (default), `blue`, `green`, `orange`, `rose`, `violet`, `yellow` |
 | `source` | | `{ "kind": "md" \| "txt" \| "docx" \| "pdf" \| "request", "path": "docs/X.md" }` |
+| `execution` | | `auto` (default): Codex implements after a submitted, settled round; `review`: documents only |
+| `summary` | recommended | `{ goal, changes?: string[], risks?: string[] }`: a short, authored overview above the full context |
 | `context` | recommended | the request, the scope, what already exists (home page, top of the outputs) |
 | `output` | | `{ "plan": "docs/PLAN_x.md", "decisions": "docs/DECISIONS_x.md" }` (default: the plan folder); an existing file that fluidplan did not write is never overwritten |
 | `phases` | | `[{ id, title, short?, estimate?, cost?, days? }]` |
@@ -38,6 +40,7 @@ decision) can carry `prompt`, `aspect`, `transparent`: the illustration to gener
 | `phase` | id of a phase (its tasks go there) |
 | `why` | why it matters; required if `critical` |
 | `proposal` | the proposal (can be rewritten in the page) |
+| `benefit`, `tradeoff` | short, visible benefit and principal risk or compromise; do not invent them or hide critical risks in detail |
 | `learn_more` | long explanation, collapsed |
 | `question` | open-question number from the source (badge) |
 | `facts` | `[{ label, value }]` |
@@ -131,3 +134,12 @@ per criterion). The exports already apply them; when revising, carry them over i
 
 Complete plans: `examples/tech-feature/plans/tech-feature/plan.json` (with the small project it
 targets), `test/fixtures/plans/mini/plan.json`.
+
+## Reading length
+
+Author `summary.goal` in at most 240 characters; keep each change and risk to one sentence.
+Aim for a proposal under 600 characters, a `why` under 500, and `benefit` / `tradeoff` under
+200 each. Put supporting explanation in `learn_more`. `check` warns when these budgets are
+exceeded or tasks lack acceptance criteria / verification; it never truncates source text.
+Existing v2 plans remain readable without these optional fields. The summary and detailed
+densities change disclosure only; choices, critical warnings and verdicts stay available.

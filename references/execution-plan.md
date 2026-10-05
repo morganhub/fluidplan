@@ -37,15 +37,22 @@ order.
 
 ## Executing the plan
 
+On Codex, a settled submitted plan in `execution: "auto"` mode proceeds here immediately after
+finalization, without an additional chat approval. An explicit review-only request uses
+`execution: "review"`. Execute the accepted scope only; a rejected decision contributes no work.
+Do not execute a draft, unresolved revision or a plan changed since the submitted version.
+
 1. Read PLAN.md in full, then DECISIONS.md for the critical decisions (knowing the *why* keeps you
    from betraying a choice while implementing it).
 2. Follow the tasks in order. For each one: do it, check each criterion, run the `verify`
    commands, then tick the task **and** its criteria in PLAN.md. That is the only manual edit
    allowed in this file.
 3. Respect the "Working rules" and the "Remark" lines: they are the person's choices.
-4. If execution reveals that a decision does not hold (missing API, overlooked constraint): do not
-   improvise. Either ask a short question in the conversation, or open a new round: edit
-   `plan.json` (`revision` set to the next round) and restart the loop (`serve`, `wait`).
+4. If execution reveals that a decision does not hold (missing API, overlooked constraint), open
+   a review for the new choice instead of silently replacing the approved one. Return material
+   choices to the page (`serve`, `wait`); use chat only when page review is unavailable. Starting
+   a review after finalization uses a new plan linked to the approved plan, since `next-round`
+   expects a submitted review, not an exported one. Do not edit `state.json` to reopen it.
 5. At the end: run the whole "Final check", then summarize what was done.
 
 ## DECISIONS.md — the decision log

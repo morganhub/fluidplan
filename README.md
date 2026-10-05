@@ -3,16 +3,18 @@
 A skill for Claude Code, Codex, and Gemini in Antigravity that turns a plan into a small web app you
 **decide** instead of a long Markdown file you read.
 
-## Version 1.1.0 — Codex and Antigravity compatibility
+## Version 1.2.0 — clearer reading, automatic implementation on Codex
 
-This update extends the original Claude Code skill to Codex and Gemini in Antigravity. It adds
-client-specific instructions for automatic round listening, so submitting a round in the web
-app continues the review without requiring a message in the chat. Codex and Antigravity keep
-their agent turn active during review; Claude Code retains its existing background wait and
-completion notifications. The interface now uses assistant-neutral labels in English and French:
-**Send the plan to AI** / **Envoyer le plan à l'IA**.
+Start with a short overview of the goal, changes and risks. Read decisions in **Summary** or
+**Detailed** density, reopen an accepted card to inspect its choices, and read the final plan as
+a document with a contents list, task criteria and a Markdown source view.
 
-![A decision card: why it matters, options with pros and cons](docs/images/02-decision.png)
+On **Codex**, sending a fully settled round now leads directly to the retained implementation
+in the same active session. Round 1 is enough; round 2 and later work the same way. Questions
+and change requests are revised first. An explicit **review-only** plan produces the documents
+without implementation.
+
+![Version 1.2.0 overview: goal, concrete changes, risks and the Summary reading control](docs/images/01-home.png)
 
 ## What it does
 
@@ -20,11 +22,12 @@ completion notifications. The interface now uses assistant-neutral labels in Eng
    can be a proposal document you already have, or the plan the AI designs for your request.
 2. You answer each card: **OK**, **Not OK**, **Change** or **Explain**. You can also rewrite any
    text in place.
-3. You click **Send the plan to AI**. The AI revises what you changed or questioned, and the page opens
-   **round 2**: you only see what changed, with the AI's note and a diff.
+3. You click **Send the plan to AI**. If a change or question needs a response, the AI revises it
+   and opens the next round, with a note and a diff. Your other answers are kept.
 4. When everything is settled, the AI writes two files:
    - **PLAN.md**: the tasks, phase by phase, with the files to touch, acceptance criteria and
-     verify commands. It is ready to execute.
+     verify commands. On Codex, the assistant executes the retained tasks automatically unless
+     you requested review only.
    - **DECISIONS.md**: every choice, why it was made, and what was ruled out.
 
 ## Requirements
@@ -73,55 +76,106 @@ Then:
 2. You answer the cards. Answers are saved as you go: you can close the page and come back.
 3. You click **Send the plan to AI**. The AI revises the plan and the page reloads into the next round.
 4. You repeat until everything is settled. The AI then writes `PLAN.md` and `DECISIONS.md`.
-5. You say *"execute the plan"*.
+5. On Codex, the AI implements the retained tasks automatically in the same active turn.
+   An approved round 1 is enough; rounds 2 and later work identically. Questions, pending
+   answers and requested revisions are settled first. Ask for exploration only (or set
+   `execution: "review"` / create with `new --review-only`) to receive documents without implementation.
 
 Keep the assistant session active during review. Claude Code uses its existing background wait
 and completion notifications. Codex and Antigravity keep an active turn awaiting the tracked wait
 command. No chat message is needed between rounds. See [`references/assistants.md`](references/assistants.md).
 After an interrupted session, *"sent"* in the conversation is a recovery option.
+The page approves the reviewed work; it does not change Codex tool permissions. A plan or
+answer edited after submission must be reviewed again before automatic implementation.
+
+The home page supports a short authored overview (`summary.goal`, `changes`, `risks`).
+Switch between summary and detailed reading from the header; the preference is saved locally.
+Proposals, choices and critical warnings remain visible. The final files have rendered Markdown
+previews, a contents list and a source view. Mobile verdicts and navigation keep their labels.
 
 ## A plan, step by step
 
-The screenshots come from the example project in [`examples/tech-feature`](examples/tech-feature):
-a plan to add e-mail reminders to a small task app.
+These screenshots show the bundled [example project](examples/tech-feature): a plan to add
+email reminders to a small task app. The screenshot script plays a demonstration review and
+simulates the assistant's revisions; it does not implement the example's tasks.
 
-**The overview.** The request, the numbers, how to answer, the outline and the phases.
+**1. Understand the decision.** The proposal, expected benefit and main tradeoff lead the card.
+Choices remain visible, and critical warnings stay visible in either density.
 
-![Home page](docs/images/01-home.png)
+![A decision in Summary density: proposal, benefit, risk, options and verdict actions](docs/images/02-decision.png)
 
-**Answering.** Here, one decision is accepted, one gets a change and another a question.
+**2. Choose the depth of reading.** Switch to **Detailed** to open supporting explanations,
+figures and diagrams. The preference is stored locally, and switching keeps unsaved text.
 
-![A change and a question](docs/images/03-answer.png)
+![Detailed reading opens the decision's figures and supporting explanations](docs/images/11-detailed.png)
 
-**Sending the round.**
+Accepted cards fold when revisiting a page in Summary density. The retained choice and critical
+warning stay visible; **Review / change choices and details** reopens the card.
 
-![Send the plan to AI](docs/images/04-send.png)
+![An accepted card with its retained choice, visible warning and reopen control](docs/images/12-accepted.png)
 
-**Round 2.** The page reloads by itself. The AI revised the two decisions you questioned, and only
-those are shown by default.
+**3. Answer in your own words.** Choose **OK**, **Not OK**, **Change** or **Explain**, or rewrite
+the proposal. A change needs a remark or rewrite; a question needs its text.
 
-![Round 2](docs/images/05-round-2.png)
+![A change request with the user's time-zone remark](docs/images/03-answer.png)
 
-Each revised card carries the AI's note and a word-level diff with the previous version.
+**4. Send the round.** The dialog shows accepted, rejected, pending and unresolved decisions,
+and explains what follows submission. A question or requested change is processed before implementation.
 
-![A revised decision](docs/images/06-revised.png)
+![Round 1 submission with one change and one question still to process](docs/images/04-send.png)
 
-**The final plan.** When everything is settled, the summary shows the tally and a preview of the
-two files.
+**5. Review what changed.** The next round opens automatically. Accepted answers survive;
+the default filter brings back the decisions that still need your response.
 
-![Summary](docs/images/07-summary.png)
+![Round 2 with two decisions to review and the assistant's revision note](docs/images/05-round-2.png)
 
-![PLAN.md preview](docs/images/08-plan-md.png)
+Open the diff to see the proposal before and after the revision.
 
-**Dark theme and phone.**
+![A revised proposal and its word-level diff](docs/images/06-revised.png)
+
+**6. Approve the settled work.** This round has no pending answers, questions or required
+revisions. In an active Codex session, submission is the approval to finalize and implement the
+retained tasks, without another “execute the plan” message in chat. This also works at round 1.
+
+![A fully settled round ready to send, with the automatic Codex implementation notice](docs/images/15-approved-send.png)
+
+**7. Read the final documents.** The summary gives the tally, downloads and finalized files.
+For review-only plans, this is the outcome; automatic Codex plans continue with implementation.
+
+![The finalized plan with the decision tally, downloads and readable document preview](docs/images/07-summary.png)
+
+**PLAN.md** opens as rendered Markdown. Use the contents list to reach a section without
+leaving the page.
+
+![PLAN.md in reading mode with its contents list and structured overview](docs/images/08-plan-md.png)
+
+Tasks show the files to change, acceptance criteria and verification commands. The preview's
+checkboxes are read-only; implementation progress is recorded in the generated file by the assistant.
+
+![A rendered task with files, nested acceptance checkboxes and verification commands](docs/images/13-plan-task.png)
+
+Switch to **Markdown source** to inspect the same text that is exported and downloaded.
+
+![The Markdown source view of PLAN.md](docs/images/14-source.png)
+
+**Dark theme and mobile.** The same interface works in both themes. Mobile keeps visible labels
+for verdicts, submission and page navigation.
 
 <p>
-  <img src="docs/images/09-dark.png" alt="Dark theme" width="62%">
-  <img src="docs/images/10-mobile.png" alt="Phone width" width="30%">
+  <img src="docs/images/09-dark.png" alt="Decision choices in the dark theme" width="68%">
+  <img src="docs/images/10-mobile.png" alt="Phone-width reading with a number slider, named verdicts and navigation" width="27%">
 </p>
 
 ## Features
 
+- **Short overview.** An authored goal, concrete changes and risks on the home page. Length
+  warnings help keep proposals concise; text is never automatically truncated.
+- **Progressive reading.** Summary and Detailed densities, supporting explanations on demand,
+  accepted cards that reopen, and visible critical consequences.
+- **Readable exports.** Rendered Markdown, semantic headings, contents navigation, nested lists,
+  read-only task checkboxes, tables, quotes, code copying and a source view.
+- **Codex implementation.** A settled submitted round automatically continues with retained
+  tasks. `execution: "review"` opts into documents only; `new --review-only` creates that mode.
 - **Decision cards.** Four answers per card: OK, Not OK, Change (with a remark or a rewrite) and
   Explain (a question). Each card shows why the decision matters, and what it involves as tasks.
 - **Controls.** Single choice (options with pros, cons and effort, plus a side-by-side compare
@@ -137,8 +191,9 @@ two files.
 - **Inputs.** Markdown, text, Word (`.docx`, read by a built-in converter) and PDF, or a plan the AI
   designs from your request.
 - **Languages.** English (default) or French, set per plan.
-- **Local.** A small Node server on `127.0.0.1` with no dependencies. Nothing leaves your machine
-  unless you generate an illustration.
+- **Local interface.** A small Node server on `127.0.0.1` with no dependencies. The page makes
+  no external request; optional illustrations use the configured provider. The assistant
+  continues to use its existing AI client.
 
 ## Configuration (optional)
 
@@ -172,11 +227,17 @@ the AI writes plan.json ──► fluidplan serve ──► the page (you answer
         │
         └──► fluidplan next-round ──► the page reloads into round n+1 ──► … ──► fluidplan finalize
                                                                                   PLAN.md, DECISIONS.md
+                                                                                          │
+                                                                            Codex auto ──► accepted tasks
 ```
 
 - The AI keeps `serve` running and listens through `wait`. Claude Code uses background task
   completion; Codex and Antigravity await the tracked job in an active turn. `wait` exits when
   you send the round and returns a **digest** of what to rework.
+- Automatic implementation requires a settled submission whose plan and answers still match
+  the archived round. A draft export, an unresolved answer or an edit after submission does
+  not supply that approval. The active assistant performs the work; the server does not run
+  the plan's commands.
 - Each file has a single writer. The AI writes `plan.json`. The page writes `answers.json`. The
   engine writes `state.json` and `images.json`.
 - `next-round` refuses to run if a decision to rework has no `revision` for the next round. It
@@ -202,7 +263,7 @@ The AI drives the engine through one command, run from the project root:
 
 | Command | What it does |
 |---|---|
-| `new --plan <id> --title "…"` | creates a plan from the template |
+| `new --plan <id> --title "…" [--review-only]` | creates a plan; review-only skips Codex implementation |
 | `check` | validates plans: errors block, warnings point at weak spots (a missing "why", a decision without tasks) |
 | `serve [--open]` | serves the page (reuses a running instance) |
 | `wait [--timeout seconds]` | blocks until the round is sent, then prints the digest; a bounded timeout returns exit code 3 |
@@ -216,7 +277,9 @@ The AI drives the engine through one command, run from the project root:
 
 ### Plan format
 
-A plan is a JSON file: pages, decisions, options, tasks, phases and a glossary. The format is
+A plan is a JSON file: an optional short `summary`, execution mode (`auto` or `review`), pages,
+decisions, options, tasks, phases and a glossary. Release 1.2.0 keeps the v2 plan format;
+existing plans work without the new optional reading fields. The format is
 described in [`references/schema.md`](references/schema.md) and
 [`engine/schema/plan.schema.json`](engine/schema/plan.schema.json). A complete example is in
 [`examples/tech-feature/plans/tech-feature/plan.json`](examples/tech-feature/plans/tech-feature/plan.json).

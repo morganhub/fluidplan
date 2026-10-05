@@ -36,33 +36,84 @@ export function inline(text) {
   return out;
 }
 
-export function md(text) {
+// A line parser keeps generated exports readable without allowing raw HTML or unsafe links.
+export function md(text, { headingOffset = 0 } = {}) {
   if (!text) return "";
-  const source = String(text).replace(/\r\n/g, "\n");
-  const blocks = [];
-  // Code blocks are set aside before splitting into paragraphs.
-  const withoutCode = source.replace(/```[^\n]*\n([\s\S]*?)```/g, (_, code) => {
-    blocks.push(`<pre class="code-block"><code>${escapeHtml(code.replace(/\n$/, ""))}</code></pre>`);
-    return `\n\n\u0001${blocks.length - 1}\u0001\n\n`;
-  });
-  return withoutCode
-    .split(/\n{2,}/)
-    .map((block) => {
-      const lines = block.split("\n").filter((line) => line.trim() !== "");
-      if (!lines.length) return "";
-      const code = lines.length === 1 && lines[0].match(/^\u0001(\d+)\u0001$/);
-      if (code) return blocks[Number(code[1])];
-      if (lines.every((line) => /^\s*[-•*]\s+/.test(line))) {
-        return `<ul>${lines.map((line) => `<li>${inline(line.replace(/^\s*[-•*]\s+/, ""))}</li>`).join("")}</ul>`;
-      }
-      if (lines.every((line) => /^\s*\d+[.)]\s+/.test(line))) {
-        return `<ol>${lines.map((line) => `<li>${inline(line.replace(/^\s*\d+[.)]\s+/, ""))}</li>`).join("")}</ol>`;
-      }
-      const heading = lines.length === 1 && lines[0].match(/^(#{1,4})\s+(.+)$/);
-      if (heading) return `<p class="md-heading">${inline(heading[2])}</p>`;
-      return `<p>${lines.map(inline).join("<br>")}</p>`;
-    })
-    .join("");
+  const lines = String(text).replace(/\r\n/g, "\n").split("\n");
+  let i = 0;
+  const output = [];
+  const listItem = (line) => line.match(/^(\s*)([-•*]|\d+[.)])\s+(.+)$/);
+  const cells = (line) => line.trim().replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map((cell) => cell.trim().replace(/\\\|/g, "|"));
+  const tableRule = (line) => line.includes("|") && cells(line).every((cell) => /^:?-{3,}:?$/.test(cell));
+  const startsBlock = (line, next = "") => /^(#{1,6}\s|\s*```|>\s?|[-*_]{3,}\s*$)/.test(line) || Boolean(listItem(line)) || tableRule(next);
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    const fence = line.match(/^\s*```([^`]*)$/);
+    if (fence) {
+      const code = [];
+      i++;
+      while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) code.push(lines[i++]);
+      if (i < lines.length) i++;
+      const language = fence[1].trim();
+      output.push(`<pre class="code-block"${language ? ` data-language="${escapeHtml(language)}"` : ""}><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+      continue;
+    }
+    const heading = line.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      const level = Math.min(6, heading[1].length + headingOffset);
+      output.push(`<h${level}>${inline(heading[2])}</h${level}>`); i++; continue;
+    }
+    if (i + 1 < lines.length && line.includes("|") && tableRule(lines[i + 1])) {
+      const head = cells(line), rows = [];
+      i += 2;
+      while (i < lines.length && lines[i].trim() && lines[i].includes("|")) rows.push(cells(lines[i++]));
+      output.push(`<div class="md-table-wrap"><table><thead><tr>${head.map((cell) => `<th scope="col">${inline(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${head.map((_, n) => `<td>${inline(row[n] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+      continue;
+    }
+    if (/^>/.test(line)) {
+      const quote = [];
+      while (i < lines.length && /^>/.test(lines[i])) quote.push(lines[i++].replace(/^> ?/, ""));
+      output.push(`<blockquote>${md(quote.join("\n"), { headingOffset })}</blockquote>`); continue;
+    }
+    if (/^([-*_])\1{2,}\s*$/.test(line.trim())) { output.push("<hr>"); i++; continue; }
+    if (listItem(line)) {
+      const renderList = (indent) => {
+        const first = listItem(lines[i]);
+        const ordered = /^\d/.test(first[2]), tag = ordered ? "ol" : "ul";
+        let html = `<${tag}>`;
+        while (i < lines.length) {
+          const item = listItem(lines[i]);
+          if (!item || item[1].length !== indent || /^\d/.test(item[2]) !== ordered) break;
+          const task = item[3].match(/^\[([ xX])\]\s+(.*)$/);
+          html += task ? `<li class="md-task"><input type="checkbox" disabled${task[1] !== " " ? " checked" : ""}>${inline(task[2])}` : `<li>${inline(item[3])}`;
+          i++;
+          while (i < lines.length && lines[i].trim()) {
+            const nested = listItem(lines[i]);
+            if (nested) {
+              if (nested[1].length <= indent) break;
+              html += renderList(nested[1].length);
+            } else if (/^\s+/.test(lines[i]) && lines[i].search(/\S/) > indent) {
+              html += `<br>${inline(lines[i++].trim())}`;
+            } else break;
+          }
+          html += "</li>";
+          // A blank line followed by another indented item stays within this list.
+          if (!lines[i]?.trim()) {
+            let next = i;
+            while (next < lines.length && !lines[next].trim()) next++;
+            if (listItem(lines[next] ?? "")?.[1].length === indent) i = next;
+          }
+        }
+        return html + `</${tag}>`;
+      };
+      output.push(renderList(listItem(line)[1].length)); continue;
+    }
+    const paragraph = [line]; i++;
+    while (i < lines.length && lines[i].trim() && !startsBlock(lines[i], lines[i + 1])) paragraph.push(lines[i++]);
+    output.push(`<p>${paragraph.map(inline).join("<br>")}</p>`);
+  }
+  return output.join("");
 }
 
 // Plain text (tooltips, attributes): without Markdown marks.

@@ -116,6 +116,7 @@ async function boot() {
     check,
     t,
     lang,
+    density: "summary",
     glossary: glossaryMatcher(plan.glossary),
     filter: state.round > 1 && state.status === "review" ? "todo" : "all",
     setFilter(value) {
@@ -139,6 +140,18 @@ async function boot() {
     asset: (file) => assetUrl(planId, file),
     go: () => {},
   };
+  const densityKey = `fluidplan:${config.root ?? location.port}:${planId}:density`;
+  try {
+    const savedDensity = localStorage.getItem(densityKey);
+    if (["summary", "detailed"].includes(savedDensity)) ctx.density = savedDensity;
+  } catch { /* storage is optional */ }
+  ctx.setDensity = (value) => {
+    if (!["summary", "detailed"].includes(value)) return;
+    ctx.density = value;
+    document.documentElement.dataset.density = value;
+    try { localStorage.setItem(densityKey, value); } catch { /* session preference remains usable */ }
+  };
+  ctx.setDensity(ctx.density);
   const api = {
     exportFinal: () => getJson(`/api/export?id=${encodeURIComponent(planId)}`, { method: "POST" }),
     submit: () => getJson(`/api/submit?id=${encodeURIComponent(planId)}`, { method: "POST" }),

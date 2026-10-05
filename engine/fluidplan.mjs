@@ -26,7 +26,7 @@ Usage: node ${toPosix(path.relative(process.cwd(), path.join(ENGINE, "fluidplan.
 Commands
   serve [--open] [--port n]        serve the page (reuses an instance already running for this project)
   check                            errors (exit code 1) and warnings, for every plan or --plan
-  new --plan <id> --title "…"      create .fluidplan/<id>/plan.json from the template [--lang en|fr]
+  new --plan <id> --title "…"      create .fluidplan/<id>/plan.json from the template [--lang en|fr] [--review-only]
   wait [--timeout seconds]         wait until the person sends the round, then print the digest
   digest                           what the assistant must rework (rounds/<n>/digest.md)
   next-round [--force]             open the next round once plan.json is revised
@@ -88,6 +88,7 @@ async function run(cmd) {
     case "finalize": {
       const result = await finalize(config, await pickPlan(config), { force: Boolean(args.force) });
       console.log(`${result.draft ? "draft written" : "plan finalized"}: ${result.plan.path}, ${result.decisions.path}`);
+      if (result.approval.autoExecute) console.log("Codex: implement the accepted tasks now, in the same active turn; no additional chat confirmation is needed.");
       return 0;
     }
     case "export": {
@@ -185,6 +186,7 @@ async function create(config) {
   const template = await readJson(path.join(ENGINE, "templates", "plan.json"));
   template.id = id;
   template.title = String(args.title);
+  template.execution = args["review-only"] ? "review" : "auto";
   template.lang = args.lang === "en" ? "en" : args.lang === "fr" ? "fr" : config.lang;
   template.$schema = toPosix(path.relative(dir, path.join(ENGINE, "schema", "plan.schema.json")));
   await writeJson(path.join(dir, "plan.json"), template);

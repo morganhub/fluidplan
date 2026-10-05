@@ -153,3 +153,12 @@ no tasks (it orders those of the others); `check` does not complain about it.
 - [ ] Tasks cite real files and verifiable criteria.
 - [ ] The screenshots (`snap`) are clean in light, in dark and at 390 px.
 - [ ] The glossary explains every acronym the person might not know.
+
+## A readable first pass
+
+Write a short `summary` with the goal, concrete changes and main risks so the home page can
+stand on its own. Lead each decision with a concise proposal; add a short `benefit` and
+`tradeoff` when known. Keep evidence in facts and longer explanations in `learn_more`.
+Do not shorten a source by removing a condition, an uncertainty or a critical risk.
+For implementation requests, attach tasks that change the product, with real files, acceptance
+criteria and verification. A task that only writes another brief does not implement a feature.

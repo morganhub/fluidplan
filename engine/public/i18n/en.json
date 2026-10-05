@@ -7,7 +7,6 @@
   "action.modify.hint": "I want it changed: say how, or rewrite the text",
   "action.explain": "Explain",
   "action.explain.hint": "Not deciding yet: I have a question",
-
   "verdict.aria": "Your answer",
   "verdict.ok": "Accepted",
   "verdict.modify": "To change",
@@ -15,16 +14,13 @@
   "verdict.explain": "Question asked",
   "verdict.ko": "Rejected",
   "verdict.pending": "No answer",
-
   "itemVerdict.ok": "OK",
   "itemVerdict.ko": "Not OK",
   "itemVerdict.modify": "To change",
   "itemVerdict.pending": "—",
-
   "importance.critical": "Critical",
   "importance.important": "Important",
   "importance.minor": "Minor",
-
   "comment.add": "Add a remark",
   "comment.addGeneral": "Add a general remark",
   "comment.remark": "Your remark (optional)…",
@@ -33,21 +29,16 @@
   "comment.item": "What should change on this item…",
   "comment.needModify": "Say what to change (or rewrite the text): without it, the decision stays open.",
   "comment.needQuestion": "Write your question: the AI will answer it next round.",
-
   "why.title": "Why it matters",
-
   "learnMore.title": "Learn more",
-
   "tasks.title": "What it involves",
   "tasks.none": "No task with this answer.",
   "tasks.acceptance": "Acceptance criteria",
   "tasks.noAcceptance": "No criteria.",
   "tasks.verify": "Verify",
-
   "decision.phase": "Phase: {title}",
   "decision.question": "Question #{n}",
   "decision.revised": "Revised",
-
   "choice.other": "Another option",
   "choice.otherDetail": "Describe it in your remark.",
   "choice.placeholder": "— choose —",
@@ -68,16 +59,12 @@
   "choice.rewriteWhich": "Option",
   "choice.rewriteLabel": "Label",
   "choice.rewriteDetail": "Detail",
-
   "number.proposed": "Proposed: {value}",
   "number.reset": "back to the proposal",
-
   "order.up": "Move up",
   "order.down": "Move down",
-
   "items.judged": "{done} / {total} reviewed",
   "items.restOk": "Everything left: OK",
-
   "edit.rewrite": "Rewrite",
   "edit.aria": "New text",
   "edit.save": "Save",
@@ -86,9 +73,7 @@
   "edit.rewritten": "Rewritten",
   "edit.showOriginal": "Show original",
   "edit.hideOriginal": "Hide original",
-
   "revision.title": "Revised in round {n}",
-
   "diff.show": "Show changes",
   "diff.hide": "Hide changes",
   "diff.title": "Title",
@@ -99,23 +84,19 @@
   "diff.item": "Item “{title}”",
   "diff.tasks": "Tasks",
   "diff.none": "No text change: only the note is new.",
-
   "filter.aria": "Filter decisions",
   "filter.all": "All",
   "filter.critical": "Critical",
   "filter.todo": "To do",
   "filter.empty": "Nothing to show with this filter on this page.",
   "filter.showAll": "Show all",
-
   "minor.title_one": "Minor point ({count})",
   "minor.title_other": "Minor points ({count})",
   "minor.intro": "Simple points, grouped so you can go fast. Open one only if it bothers you.",
   "minor.validateAll": "Accept all",
-
   "nav.pages": "Plan pages",
   "nav.open": "Open the outline",
-  "nav.progress": "{done} / {total} decisions made",
-
+  "nav.progress": "{done} / {total} reviewed",
   "home.nav": "Home",
   "home.kicker": "Plan to decide",
   "home.decisions_one": "{count} decision",
@@ -139,13 +120,12 @@
   "home.phases": "Project phases",
   "home.phasesIntro": "In the proposed order (or the one you choose).",
   "home.start": "Start",
-
   "summary.nav": "Summary and final plan",
   "summary.kicker": "End",
   "summary.title": "Summary and final plan",
   "summary.intro": "Where the plan stands, what is left to decide, and a preview of the two files the AI will write: PLAN.md (to execute) and DECISIONS.md (why each choice was made).",
   "summary.readyTitle": "Everything is decided",
-  "summary.readyText": "Send it to the AI: it will write PLAN.md and DECISIONS.md, then offer to execute the plan.",
+  "summary.readyText": "Send it to the AI to finalize PLAN.md and DECISIONS.md.",
   "summary.notReadyTitle": "Not ready yet",
   "summary.notReadyText": "{pending} without an answer, {revise} to rework. You can send this round anyway: the AI reworks what needs it, the rest stays open.",
   "summary.stat.ok": "Accepted",
@@ -163,7 +143,6 @@
   "summary.noProviders": "Generated illustrations: no provider configured (engine/.env).",
   "summary.otherVariant": "another option (see the remark)",
   "summary.none": "none",
-
   "submit.button": "Send the plan to AI",
   "submit.title": "Send round {n} to AI?",
   "submit.ready": "Everything is decided: the AI will write the final plan.",
@@ -174,7 +153,6 @@
   "submit.pending_other": "{count} decisions have no answer yet: they stay open for the next round.",
   "submit.confirm": "Send",
   "submit.done": "Round sent — awaiting processing by AI.",
-
   "banner.errors_one": "The plan has {count} error: it stays a draft",
   "banner.errors_other": "The plan has {count} errors: it stays a draft",
   "banner.submittedTitle": "Round {n} sent — awaiting processing by AI",
@@ -187,31 +165,24 @@
   "banner.planChangedTitle": "The plan changed on disk",
   "banner.planChangedText": "Reload to see the latest version; your answers are kept.",
   "banner.reload": "Reload",
-
   "save.saved": "Saved",
   "save.saving": "Saving…",
   "save.savedAt": "Saved at {time}",
   "save.offline": "Server unreachable: kept in this browser",
   "save.stale": "Outdated round: reload the page",
-
   "round.label": "Round {n}",
   "round.short": "round {n}",
-
   "glossary.title": "Glossary",
   "glossary.empty": "No terms.",
-
   "theme.toggle": "Change theme",
   "theme.system": "Theme: system",
   "theme.light": "Theme: light",
   "theme.dark": "Theme: dark",
-
   "common.close": "Close",
   "common.cancel": "Cancel",
-
   "op.create": "create",
   "op.modify": "modify",
   "op.delete": "delete",
-
   "visual.unknown": "Unknown visual “{kind}”",
   "visual.failed": "The “{kind}” visual could not render",
   "visual.values": "Show values",
@@ -239,7 +210,6 @@
   "visual.risk.low": "Low risk",
   "visual.risk.medium": "Medium risk",
   "visual.risk.high": "High risk",
-
   "export.draft": "DRAFT",
   "export.draftDetail": "not every decision is made yet ({pending} without an answer, {revise} to rework).",
   "export.metaReady": "Approved on {date}, round {rounds}",
@@ -248,7 +218,6 @@
   "export.generated": "generated by fluidplan",
   "export.quote": "“{text}”",
   "export.dateTime": "{day} at {time}",
-
   "planMd.title": "{title} — execution plan",
   "planMd.regenerate": "Do not edit by hand before execution: regenerate with `fluidplan export --plan {id}`. During execution, tick tasks as you go.",
   "planMd.context": "Context",
@@ -266,7 +235,6 @@
   "planMd.items": "Items kept",
   "planMd.finalCheck": "Final check",
   "planMd.outOfScope": "Out of scope",
-
   "decisionsMd.title": "{title} — decisions",
   "decisionsMd.tally": "Tally: {ok} accepted, {modify} to change, {explain} questions, {ko} rejected, {pending} without an answer ({all} decisions).",
   "decisionsMd.kept": "Accepted decisions",
@@ -288,7 +256,6 @@
   "decisionsMd.detail": "Detail",
   "decisionsMd.opinion": "Opinion",
   "decisionsMd.remark": "Remark",
-
   "images.generate": "Illustrate",
   "images.again": "Another version",
   "images.generated": "Generated",
@@ -316,5 +283,31 @@
   "images.confirm": "Generate",
   "images.done": "Illustration saved: {path}",
   "images.noProvider": "No service configured: add a key in engine/.env.",
-  "images.allExhausted": "Limit reached for every configured service ({quota} per service and per plan)."
+  "images.allExhausted": "Limit reached for every configured service ({quota} per service and per plan).",
+  "density.summary": "Summary",
+  "density.detailed": "Detailed",
+  "density.switch": "Change reading detail",
+  "nav.unresolved_one": "{count} point to clarify",
+  "nav.unresolved_other": "{count} points to clarify",
+  "decision.benefit": "Expected benefit",
+  "decision.tradeoff": "Tradeoff / risk",
+  "decision.facts": "Figures and references",
+  "decision.visual": "View diagram",
+  "home.goal": "At a glance",
+  "home.changes": "What changes",
+  "home.risks": "Risks and limitations",
+  "execution.auto": "After a fully settled round is sent, Codex implements the retained tasks. Questions and change requests trigger a revision before execution.",
+  "execution.review": "This review explores directions. Sending it produces the documents without starting implementation.",
+  "document.outline": "Contents",
+  "document.view": "Document view",
+  "document.read": "Read",
+  "document.source": "Markdown source",
+  "document.copyCode": "Copy code",
+  "document.copied": "Code copied",
+  "document.copyFailed": "Could not copy code",
+  "decision.details": "Review / change choices and details",
+  "decision.retained": "Retained choice: {value}",
+  "summary.readyAutoText": "Send this round to finalize PLAN.md and DECISIONS.md. In an active Codex session, the AI then implements the retained tasks without another chat confirmation.",
+  "summary.readyReviewText": "Send this round to finalize PLAN.md and DECISIONS.md. This is a review-only plan: no implementation follows.",
+  "summary.finalizedText": "The finalized PLAN.md and DECISIONS.md are available below for reading and download."
 }

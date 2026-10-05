@@ -27,6 +27,21 @@ export function validatePlan(plan, { planDir, root, visualKinds = [], looseVisua
   for (const key of ["id", "title", "pages"]) if (!plan[key]) fail("plan", `missing "${key}" field`);
   if (plan.lang && !["fr", "en"].includes(plan.lang)) fail("plan", `unknown language "${plan.lang}" (en, fr)`);
   if (!plan.context) warn("plan", 'no "context": the home page does not explain the request');
+  if (plan.execution !== undefined && !["auto", "review"].includes(plan.execution)) fail("plan", '"execution" must be "auto" or "review"');
+  const shortText = (where, value, max) => {
+    if (typeof value === "string" && value.length > max) warn(where, `${value.length} characters: shorten the visible text and move detail to learn_more`);
+  };
+  shortText("plan context", plan.context, 1200);
+  if (plan.summary !== undefined) {
+    if (!plan.summary || typeof plan.summary !== "object" || Array.isArray(plan.summary)) fail("plan", '"summary" must be an object');
+    else {
+      if (typeof plan.summary.goal !== "string" || !plan.summary.goal.trim()) fail("plan summary", 'missing "goal"');
+      shortText("plan summary goal", plan.summary.goal, 240);
+      for (const key of ["changes", "risks"]) {
+        if (plan.summary[key] !== undefined && (!Array.isArray(plan.summary[key]) || plan.summary[key].some((text) => typeof text !== "string"))) fail("plan summary", `"${key}" must be a list of strings`);
+      }
+    }
+  }
 
   const kinds = new Set([...BUILTIN_VISUALS, ...visualKinds]);
   const phases = new Set();
@@ -57,7 +72,7 @@ export function validatePlan(plan, { planDir, root, visualKinds = [], looseVisua
   const pageIds = new Set();
   const assets = [];
   const references = [];
-  const textBlob = [plan.context ?? ""];
+  const textBlob = [plan.context ?? "", plan.summary?.goal ?? "", ...(Array.isArray(plan.summary?.changes) ? plan.summary.changes : []), ...(Array.isArray(plan.summary?.risks) ? plan.summary.risks : [])];
 
   const visual = (where, v) => {
     if (!v) return;
@@ -90,7 +105,13 @@ export function validatePlan(plan, { planDir, root, visualKinds = [], looseVisua
     if (decisions.has(decision.id)) fail(dw, "duplicate id");
     decisions.set(decision.id, decision);
     if (!decision.title) fail(dw, "missing title");
-    textBlob.push(decision.proposal ?? "", decision.why ?? "", decision.learn_more ?? "");
+    shortText(`${dw} proposal`, decision.proposal, 600);
+    shortText(`${dw} why`, decision.why, 500);
+    for (const key of ["benefit", "tradeoff"]) {
+      if (decision[key] !== undefined && typeof decision[key] !== "string") fail(dw, `"${key}" must be a string`);
+      shortText(`${dw} ${key}`, decision[key], 200);
+    }
+    textBlob.push(decision.proposal ?? "", decision.why ?? "", decision.learn_more ?? "", decision.benefit ?? "", decision.tradeoff ?? "");
     const importance = decision.importance ?? "important";
     if (!IMPORTANCE.includes(importance)) fail(dw, `unknown importance "${importance}" (${IMPORTANCE.join(", ")})`);
     if (importance === "critical" && !String(decision.why ?? "").trim()) fail(dw, 'critical decision without "why" (why it matters)');
@@ -149,6 +170,8 @@ export function validatePlan(plan, { planDir, root, visualKinds = [], looseVisua
       if (taskIds.has(task.id)) fail(tw, "duplicate task id in the decision");
       taskIds.add(task.id);
       if (!task.title) fail(tw, "missing title");
+      if (!task.acceptance?.length) warn(tw, "no acceptance criteria: how will completion be verified?");
+      if (!task.verify?.length) warn(tw, "no verification commands: specify how to check completion");
       if (task.phase && !phases.has(task.phase)) fail(tw, `unknown phase "${task.phase}"`);
       for (const file of task.files ?? []) {
         if (!file?.path) {

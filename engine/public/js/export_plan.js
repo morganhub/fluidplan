@@ -13,6 +13,10 @@ export function buildPlanMd(plan, answers, { t, now = new Date(), state = {} } =
   L.push(...header.lines);
   L.push(`> ${t("planMd.regenerate", { id: plan.id })}`, "");
 
+  if (plan.summary) {
+    L.push(`## ${t("home.goal")}`, "", plan.summary.goal, "");
+    for (const key of ["changes", "risks"]) if (plan.summary[key]?.length) L.push(`### ${t(`home.${key}`)}`, "", ...plan.summary[key].map((text) => `- ${text}`), "");
+  }
   if (plan.context) L.push(`## ${t("planMd.context")}`, "", plan.context.trim(), "");
 
   const resolved = resolvePlanTasks(plan, answers);

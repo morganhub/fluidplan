@@ -1,6 +1,6 @@
 ---
 name: fluidplan
-description: Turn a Markdown, text, Word, or PDF plan with choices into a local interactive web page. The user decides each option and can rewrite text; the assistant listens for submitted rounds, revises the plan, and produces PLAN.md and DECISIONS.md. Use when asked for fluidplan, to present a proposal for review, or to let the user settle several design or implementation decisions. Not for a single decision or a document that only needs reading.
+description: Turn a Markdown, text, Word, or PDF plan with choices into a local interactive web page. The user decides each option and can rewrite text; the assistant listens for submitted rounds, revises the plan, and produces PLAN.md and DECISIONS.md. On Codex, a settled submitted plan automatically proceeds to the accepted implementation unless review-only was requested. Use when asked for fluidplan, to present a proposal for review, or to let the user settle several design or implementation decisions. Not for a single decision or a document that only needs reading.
 ---
 
 # fluidplan
@@ -29,7 +29,11 @@ Not for: a single decision, a document that only needs reading, a plan with no c
 
 1. **Frame.** Source: a document or a request? Plan language: `en` (default) or `fr` — the
    person's language. A short `id` (`auth-oauth`). If the request is vague, ask your questions
-   first: a fluidplan plan does not replace scoping.
+   first: a fluidplan plan does not replace scoping. Set `execution: "auto"` for work to implement
+   (the default); set `execution: "review"` when the person explicitly requests review or
+   exploration only. Explain this outcome on the page before submission. For implementation,
+   tasks must change the actual product and verify its behavior: do not replace the requested
+   implementation with tasks that only write briefs or another plan.
 2. **Collect.**
    - `.md` / `.txt`: read directly.
    - `.pdf`: Claude's Read tool, in chunks (`pages: "1-20"`); on other clients, use the available PDF reader or text extraction in page ranges.
@@ -62,7 +66,7 @@ Not for: a single decision, a document that only needs reading, a plan with no c
    - `node <skill>/engine/fluidplan.mjs wait --plan <id>`: exits on submission and prints the digest.
    Tell the person the address, the four possible answers, rewriting on hover, and the localized
    "Send the plan to AI" button ("Envoyer le plan à l'IA" in French). Say that you are listening.
-   **Keep listening until submission, finalization, or the person's interruption.** On Codex and
+   **Keep listening until submission, completion of the agreed work, or the person's interruption.** On Codex and
    Antigravity, keep the agent turn active and follow the wait command with the client's job-wait
    tools; a detached process alone cannot resume an idle conversation. Claude Code keeps its
    existing background command and completion-notification workflow. Asking the person to write
@@ -84,7 +88,13 @@ Not for: a single decision, a document that only needs reading, a plan with no c
    Back to step 7; do not end the Codex or Antigravity turn while waiting for the next submission.
 8. **Finalize** when the digest has nothing left to rework and nothing without an answer:
    `node <skill>/engine/fluidplan.mjs finalize --plan <id>` writes `PLAN.md` and `DECISIONS.md`.
-   Reread them, present them in a few lines, offer to execute.
+   Reread them. On Codex, use the digest / finalize `approval.autoExecute` signal: a submitted,
+   settled plan unchanged since submission with `execution: "auto"` authorizes the
+   accepted tasks: announce that implementation is starting in commentary and continue directly
+   to step 9 in the same turn. This applies at round 1, round 2, or any later round; never require
+   two rounds or another chat confirmation. Rejected decisions are excluded from the work, not
+   a reason to stop accepted tasks. For `execution: "review"`, finish with the documents.
+   If the approved plan has no retained tasks, report that there is no work to execute.
 9. **Execute** `PLAN.md` in order (`references/execution-plan.md`): tick each task and each
    criterion as you go, and run its verify commands. A deviation from a decision opens a new round
    instead of being settled silently.
@@ -92,6 +102,12 @@ Not for: a single decision, a document that only needs reading, a plan with no c
 ## Rules
 
 - Never write `answers.json` or `state.json` by hand: the page and the CLI take care of them.
+- Submission approves only the choices and tasks the person actually reviewed. Pending answers,
+  questions, required revisions or edits after submission prevent automatic execution. Do not
+  synthesize approval or use `--force` to turn an unsettled plan into executable authorization.
+- An accepted plan does not change Codex permissions or authorize publishing, pushing to GitHub,
+  deployment or paid services unless those actions were explicitly authorized. Preserve a request
+  to pause or review only; resume within the agreed scope when requested.
 - `plan.json` is yours; a revised decision always carries `revision.round` = the next round,
   otherwise `next-round` refuses (by design: nothing gets lost).
 - After three rounds on the same decision (the digest flags it), offer to settle it in the

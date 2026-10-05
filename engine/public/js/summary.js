@@ -1,7 +1,8 @@
 // The summary: where the plan stands, what is left, and a preview of the two final files. The main
-// action stays “Send to Claude”: Claude is the one who finalizes; writing the files from here gives
+// action stays “Send the plan to AI”: the assistant finalizes; writing the files from here gives
 // a preview (DRAFT until everything is decided).
 import { h } from "./dom.js";
+import { documentPreview } from "./document.js";
 import { verdictBadge, VERDICT_STYLE } from "./decision.js";
 import { buildDecisionsMd } from "./export_decisions.js";
 import { buildPlanMd } from "./export_plan.js";
@@ -15,8 +16,8 @@ export function renderSummary(ctx, { api, submit }) {
   const stats = h("div", { class: "stat-grid five" });
   const lists = h("div", { class: "summary-lists" });
   const status = h("p", { class: "export-status muted" });
-  const planPre = h("pre", { class: "md-preview" });
-  const decisionsPre = h("pre", { class: "md-preview" });
+  const planPreview = documentPreview("plan-doc", t);
+  const decisionsPreview = documentPreview("decisions-doc", t);
 
   const sendButton = button({ label: t("submit.button"), icon: "send", onclick: submit });
   const writeButton = button({ label: t("summary.write"), icon: "file-check", variant: "outline", onclick: write });
@@ -26,8 +27,8 @@ export function renderSummary(ctx, { api, submit }) {
   const preview = tabs({
     ariaLabel: t("summary.preview"),
     items: [
-      { id: "plan", label: "PLAN.md", icon: "file-text", render: () => planPre },
-      { id: "decisions", label: "DECISIONS.md", icon: "scale", render: () => decisionsPre },
+      { id: "plan", label: "PLAN.md", icon: "file-text", render: () => planPreview.el },
+      { id: "decisions", label: "DECISIONS.md", icon: "scale", render: () => decisionsPreview.el },
     ],
   });
 
@@ -88,7 +89,7 @@ export function renderSummary(ctx, { api, submit }) {
     const c = counts(plan, store.answers);
     const ready = readiness(plan, store.answers);
     readinessSlot.replaceChildren(ready.ready
-      ? alert({ variant: "success", icon: "circle-check", title: t("summary.readyTitle"), description: t("summary.readyText") })
+      ? alert({ variant: "success", icon: "circle-check", title: t("summary.readyTitle"), description: t(["ready", "exported"].includes(ctx.state.status) ? "summary.finalizedText" : plan.execution === "review" ? "summary.readyReviewText" : "summary.readyAutoText") })
       : alert({ variant: "default", icon: "circle-dashed", title: t("summary.notReadyTitle"), description: t("summary.notReadyText", { pending: ready.pending.length, revise: ready.revise.length }) }));
     const tile = (key, value) => h("div", { class: `stat-tile tone-${key}` },
       h("div", { class: "stat-label" }, icon(VERDICT_STYLE[key].icon), t(`summary.stat.${key}`)),
@@ -114,8 +115,8 @@ export function renderSummary(ctx, { api, submit }) {
     const locked = ctx.readOnly();
     sendButton.disabled = locked;
     sendButton.hidden = ctx.state.status === "exported";
-    planPre.textContent = planText();
-    decisionsPre.textContent = decisionsText();
+    planPreview.setText(planText());
+    decisionsPreview.setText(decisionsText());
   }
   update();
   return { page: { id: "_summary" }, el, update };

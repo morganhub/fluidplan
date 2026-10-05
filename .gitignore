@@ -21,3 +21,6 @@ test/fixtures/plans/*/rounds/
 
 # Local marketing material, not published
 social/
+
+# Local product roadmap, not published
+/ROADMAP.md

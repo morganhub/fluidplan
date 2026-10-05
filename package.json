@@ -1,6 +1,6 @@
 {
   "name": "fluidplan",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "A skill for Claude Code, Codex, and Gemini in Antigravity: settle decisions in a local web app, let the AI revise each round, get a PLAN.md ready to execute.",
   "keywords": [

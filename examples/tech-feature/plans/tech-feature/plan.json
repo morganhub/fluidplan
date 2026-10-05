@@ -6,6 +6,19 @@
   "subtitle": "Tasklet · feature plan",
   "lang": "en",
   "accent": "blue",
+  "execution": "auto",
+  "summary": {
+    "goal": "Help users act on overdue tasks without keeping Tasklet open.",
+    "changes": [
+      "Run a scheduled job to detect overdue tasks and avoid duplicate reminders.",
+      "Send email reminders with action and unsubscribe links.",
+      "Add notification preferences and roll out gradually."
+    ],
+    "risks": [
+      "Email delivery depends on domain authentication and relay configuration.",
+      "Repeated job runs must never send duplicate reminders."
+    ]
+  },
   "source": { "kind": "request" },
   "context": "**Request:** send email reminders for overdue tasks.\n\nTasklet is a task manager: Express API, SQLite (`better-sqlite3`), framework-free front end in `public/`. About 1,200 active users, **a single instance** in production. Today an overdue task is only shown in red in the list, and only if the user opens the app; no email goes out.\n\n**In scope:** detecting overdue tasks, sending the emails, letting users act or unsubscribe from the email itself. **Out of scope:** push notifications, SMS, per-task reminder settings.",
   "phases": [
@@ -83,6 +96,8 @@
           "title": "What triggers the reminders",
           "importance": "critical",
           "phase": "p3",
+          "benefit": "Use a simple scheduler suited to the existing single-instance deployment.",
+          "tradeoff": "A scheduler tied to one process needs revisiting if Tasklet scales to several instances.",
           "why": "The trigger decides whether a reminder survives a restart, whether it goes out twice the day we add a second instance, and what extra infrastructure we have to run. Changing it after launch means rewriting how the job is started and monitored.",
           "proposal": "A **cron** inside the Express process (the `node-cron` library) that runs the reminder job every N minutes (D4). Tasklet runs on a single instance: a message queue would be one more service to operate, with nothing to gain today.",
           "learn_more": "**Why not `setInterval`?** It doesn't align with the clock: a restart at 8:07 shifts every run by 7 minutes. `node-cron` fires at fixed times.\n\n**When to move to a worker?** The day we start a second API instance. The duplicate guard (D3) already prevents duplicate emails, but every instance would repeat the same work.\n\nDocs: [node-cron](https://www.npmjs.com/package/node-cron), [BullMQ](https://docs.bullmq.io/).",

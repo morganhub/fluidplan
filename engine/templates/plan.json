@@ -6,7 +6,9 @@
   "subtitle": "",
   "lang": "en",
   "accent": "neutral",
+  "execution": "auto",
   "source": { "kind": "request" },
+  "summary": { "goal": "The intended result in one sentence.", "changes": ["The concrete change"], "risks": ["The main known limitation"] },
   "context": "The request in two or three sentences, the scope, what already exists.",
   "phases": [
     { "id": "p1", "title": "First phase", "estimate": "≈ 1 d", "days": 1 }
@@ -25,6 +27,8 @@
           "importance": "important",
           "phase": "p1",
           "why": "Why it matters: the context, and what a mistake would cost.",
+          "benefit": "The concrete benefit for the person.",
+          "tradeoff": "The main known compromise or risk.",
           "proposal": "What is proposed, in plain words.",
           "tasks": [
             {

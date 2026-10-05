@@ -39,6 +39,8 @@ cpSync(path.join(HERE, "fixtures", "plans", ID), planDir, { recursive: true });
 {
   const file = path.join(planDir, "plan.json");
   const plan = JSON.parse(readFileSync(file, "utf8"));
+  plan.summary = { goal: "Cache sessions while keeping expiry predictable.", changes: ["Add a cache and expiry notices."], risks: ["Expired sessions must never stay valid."] };
+  plan.pages[0].decisions[0].tradeoff = "Memory is limited to a single process.";
   plan.pages.find((p) => p.id === "interface").visual = { kind: "image", prompt: "Session expiry banner in a web app, flat style", aspect: "16:9" };
   writeFileSync(file, JSON.stringify(plan, null, 2));
 }
@@ -74,9 +76,42 @@ const waitFor = async (predicate, what, timeout = 8000) => {
 };
 
 try {
+  await check("reading densities preserve drafts, preferences, choices and critical warnings", async () => {
+    await browser.goto(`${base}/?reading=home#/_home`, 900);
+    assert.match(await text(".home-synthesis"), /Cache sessions/);
+    assert.equal(await js('return document.querySelector(".reading-detail").open;'), false);
+    await browser.goto(`${base}/?reading=decision#/storage`, 900);
+    assert.equal(await js('return document.documentElement.dataset.density;'), "summary");
+    assert.match(await text("#d-D1 .alert-warning"), /./, "critical context stays visible");
+    assert.match(await text("#d-D1 .decision-tradeoff"), /single process/);
+    assert.equal(await js('return document.querySelector("#d-D1 input[value=memory]").getClientRects().length > 0;'), true);
+    await click("#d-D1 .editable-trigger");
+    await type("#d-D1 .editable-editor textarea", "Unsaved proposal");
+    await click(".density-button");
+    assert.equal(await js('return document.querySelector("#d-D1 .editable-editor textarea").value;'), "Unsaved proposal");
+    assert.equal(await js('return [...document.querySelectorAll(".reading-detail")].every(d => d.open);'), true);
+    await click("#d-D1 .editable-buttons .btn:nth-child(2)");
+    await browser.goto(`${base}/?reading=persist#/storage`, 900);
+    assert.equal(await js('return document.documentElement.dataset.density;'), "detailed");
+    await click(".density-button");
+    await browser.resize(390, 844);
+    assert.equal(await js('return document.documentElement.scrollWidth <= innerWidth;'), true);
+    assert.equal(await js('return getComputedStyle(document.querySelector(".toggle-label")).display !== "none";'), true);
+    assert.equal(await js('const footer = document.querySelector("#d-D1 .card-footer").getBoundingClientRect(); return [...document.querySelectorAll("#d-D1 .card-footer .toggle")].every(b => { const r = b.getBoundingClientRect(); return r.left >= footer.left && r.right <= footer.right; });'), true, "named mobile verdicts fit inside the card");
+    assert.equal(await js('return getComputedStyle(document.querySelector(".submit-button span")).display !== "none";'), true);
+    await browser.resize(1280, 900);
+  });
+
   await check("round 1: choice, slider driving an extension, minor points, rewrite, change", async () => {
     await browser.goto(`${base}/#/storage`, 900);
     await click('#d-D1 input[value="memory"]');
+    await click(".density-button");
+    await click(".density-button");
+    assert.equal(await js('return document.querySelector("#d-D1 .decision-details").open;'), false, "accepted card folds in summary mode");
+    assert.match(await text("#d-D1 .retained-choice"), /In-process memory/);
+    assert.match(await text("#d-D1 .alert-warning"), /./);
+    await click("#d-D1 .decision-details > summary");
+    assert.equal(await js('return document.querySelector("#d-D1 input[value=memory]").checked;'), true, "folding preserves the choice");
     await click("#d-D1 .editable-trigger");
     await type("#d-D1 .editable-editor textarea", "An in-process cache first, Redis later if we scale out.");
     await click("#d-D1 .editable-editor .btn");
@@ -178,6 +213,7 @@ try {
     const put = await fetch(`${base}/api/answers?id=${ID}&round=2`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(current) });
     assert.equal(put.status, 200);
     await api(`/api/submit?id=${ID}`, { method: "POST" });
+    assert.match(cli("digest", "--plan", ID), /continue immediately with the accepted tasks/, "round 2 starts automatic execution");
     cli("finalize", "--plan", ID);
     const planMd = readFileSync(path.join(planDir, "PLAN.md"), "utf8");
     const decisionsMd = readFileSync(path.join(planDir, "DECISIONS.md"), "utf8");
@@ -190,6 +226,22 @@ try {
     assert.match(decisionsMd, /### D2 · The time to live[\s\S]*?- \*\*History:\*\* round 1: to change → round 2: accepted/);
     assert.equal((await api(`/api/state?id=${ID}`)).status, "exported");
     await waitFor(async () => (await text(".banners"))?.includes("Plan finalized"), "final banner");
+  });
+
+  await check("exports render headings and readonly criteria, with contents and raw source views", async () => {
+    await browser.goto(`${base}/?reading=export#/_summary`, 900);
+    assert.match(await text(".md-document h2"), /Session cache/);
+    assert.equal(await js('return [...document.querySelectorAll(".md-document input[type=checkbox]")].every(i => i.disabled);'), true);
+    assert.equal(await js('return document.querySelectorAll(".md-document input[type=checkbox]").length > 0;'), true);
+    await click(".document-reader details summary");
+    const hash = await js("return location.hash;");
+    await click(".md-outline .btn");
+    assert.equal(await js("return location.hash;"), hash, "contents navigation does not interfere with routing");
+    await click("#tab-plan-doc-source");
+    assert.match(await text(".md-preview"), /^# Session cache/);
+    await click("#tab-plan-doc-read");
+    await browser.resize(390, 844);
+    assert.equal(await js('return document.documentElement.scrollWidth <= innerWidth;'), true);
   });
 
   await check("no console error", async () => {

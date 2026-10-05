@@ -6,6 +6,7 @@ import { applyGlossary } from "./glossary.js";
 import { illustrationFor } from "./illustration.js";
 import { icon } from "./icons.js";
 import { md } from "./md.js";
+import { readingDetail } from "./reading.js";
 import { allDecisions, importanceOf, resolvePlanTasks, verdict } from "./model.js";
 import { VERDICT_ICONS } from "./controls.js";
 import { accordion, badge, button, card, tabs } from "./ui.js";
@@ -55,7 +56,12 @@ export function renderPage(page, ctx) {
     const visual = renderVisual(page.visual, ctx);
     const illustration = illustrationFor(`page:${page.id}`, page.visual, ctx);
     parts.push(visual);
-    el.append(h("section", { class: "card page-visual" }, h("div", { class: "card-content" }, illustration?.el, visual.el, page.visual.caption ? h("p", { class: "visual-caption" }, page.visual.caption) : null)));
+    const content = h("section", { class: "card page-visual" }, h("div", { class: "card-content" }, illustration?.el, visual.el, page.visual.caption ? h("p", { class: "visual-caption" }, page.visual.caption) : null));
+    if (page.visual.kind === "image") el.append(content);
+    else {
+      const detail = readingDetail(ctx, { label: t("decision.visual"), icon: "layers", content });
+      parts.push(detail); el.append(detail.el);
+    }
   }
 
   for (const decision of main) {
@@ -175,6 +181,13 @@ export function renderHome(ctx) {
         badge(t("home.decisions", { count: rows.length }), { variant: "secondary" }),
         critical ? badge(t("home.critical", { count: critical }), { variant: "danger-outline", icon: "octagon-alert" }) : null)));
 
+  if (plan.summary) {
+    const section = (key, items) => items?.length ? h("section", {}, h("h3", {}, t(`home.${key}`)), h("ul", {}, items.map((text) => h("li", { html: md(text) })))) : null;
+    el.append(card({ className: "home-synthesis", header: [h("h2", { class: "card-title" }, t("home.goal"))], content: h("div", { class: "d-text" },
+      h("div", { html: md(plan.summary.goal) }), section("changes", plan.summary.changes), section("risks", plan.summary.risks)) }));
+  }
+  el.append(h("p", { class: "workflow-notice" }, t(plan.execution === "review" ? "execution.review" : "execution.auto")));
+
   if (plan.context) {
     const context = card({
       className: "home-context",
@@ -182,7 +195,10 @@ export function renderHome(ctx) {
       content: h("div", { class: "d-text", html: md(plan.context) }),
     });
     applyGlossary(context, ctx.glossary);
-    el.append(context);
+    if (plan.summary) {
+      const detail = readingDetail(ctx, { label: t("home.context"), icon: "book-open", content: context });
+      parts.push(detail); el.append(detail.el);
+    } else el.append(context);
   }
 
   const stat = (value, label, name) => h("div", { class: "stat-tile" }, h("div", { class: "stat-label" }, icon(name), label), h("div", { class: "stat-value" }, String(value)));
